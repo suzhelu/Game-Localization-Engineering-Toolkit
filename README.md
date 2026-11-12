@@ -42,11 +42,12 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 
 ## 首批可运行 Python 工具
 
-本仓库新增一组通用文件安全工具：Windows 路径规范化与白名单差异检查、流式 SHA-256、JSON manifest 生成和验证。代码、合成示例及自动化测试位于 `src/`、`examples/` 和 `tests/`。
+本仓库提供通用文件安全工具和一个保守的 BGI 脚本文本槽适配器：Windows 路径规范化与白名单差异检查、流式 SHA-256、JSON manifest 生成和验证，以及按显式调用参数规则识别 BGI 正文、姓名、菜单和 UI 字符串。代码、合成示例及自动化测试位于 `src/`、`examples/` 和 `tests/`。
 
 - 安装与使用：[`docs/python-toolkit-quickstart.md`](docs/python-toolkit-quickstart.md)
 - 来源与改造说明：[`docs/code-migration.md`](docs/code-migration.md)
 - 测试结果：[`docs/test-report.md`](docs/test-report.md)
 - 公开安全检查：[`docs/publication-safety-review.md`](docs/publication-safety-review.md)
+- BGI 适配器说明：[`docs/bgi-adapter.md`](docs/bgi-adapter.md)
 
-在仓库根目录运行测试：`python -m unittest discover -s tests -v`。当前工具不包含游戏解析器、编译器、部署器、游戏文件或汉化文本。
+在仓库根目录运行测试：`python -m unittest discover -s tests -v`。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。仓库不包含游戏文件、真实游戏文本、译文、部署器或第三方编译器。

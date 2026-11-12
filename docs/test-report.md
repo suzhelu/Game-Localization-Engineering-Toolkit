@@ -8,10 +8,10 @@ Command:
 python -m unittest discover -s tests -v
 ```
 
-Result: **23 tests passed, 0 failed, 0 skipped**.
+Result: **45 tests passed, 0 failed, 0 skipped**.
 
-The suite covers known SHA-256 vectors and content changes; relative and absolute paths; Chinese and space-containing names; case-insensitive Windows comparison; traversal, device namespace, alternate data stream, trailing-dot/space and reserved-device-name rejection; symbolic-link/junction escape and reparse ancestors; whitelist changes, additions and removals; and manifest creation, duplicate rejection, missing files and hash/size mismatch.
+The suite covers known SHA-256 vectors and content changes; relative and absolute paths; Chinese and space-containing names; case-insensitive Windows comparison; traversal, device namespace, alternate data stream, trailing-dot/space and reserved-device-name rejection; symbolic-link/junction escape and reparse ancestors; whitelist changes, additions and removals; manifest creation, duplicate rejection, missing files and hash/size mismatch; and synthetic BGI extraction, slot identity, categories, locations, language choices, opaque resources, escaped strings, safe writeback, malformed inputs, unresolved calls, standalone literal reporting, and structural invariants.
 
-The synthetic manifest example was also verified successfully with `python examples/verify_sample.py`.
+The synthetic manifest example was also verified successfully with `python examples/verify_sample.py`. The synthetic BGI example was run successfully with `python examples/bgi/translate_synthetic.py`.
 
 The reparse tests used Windows directory junctions because this environment does not grant ordinary symbolic-link creation privileges. The code rejects both symlinks and Windows reparse points.

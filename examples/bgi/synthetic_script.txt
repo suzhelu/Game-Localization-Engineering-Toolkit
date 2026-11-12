@@ -1,0 +1,16 @@
+void Demo() {
+    // Synthetic-only example. This comment must remain untouched.
+    LoadAsset("ui:sample-background");
+    OutputLine("JP_SAMPLE_NAME", "JP_SAMPLE_BODY", "Sample Guide", "A sample line.", 0);
+    OutputLineAll("JP_MENU_PROMPT", "Choose a sample option.", 0);
+
+    char Menu[2];
+    if(GetGlobalFlag(GLanguage)==1) {
+        Menu[0]="Continue";
+        Menu[1]="Return";
+    } else {
+        Menu[0]="JP_CONTINUE";
+        Menu[1]="JP_RETURN";
+    }
+    Select(2,Menu);
+}

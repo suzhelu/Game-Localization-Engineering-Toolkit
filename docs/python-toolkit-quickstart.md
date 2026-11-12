@@ -1,6 +1,6 @@
 # Game Localization Engineering Toolkit
 
-Small Python utilities for safe file manifests in localization workflows. This first extraction contains path safety, SHA-256 hashing, tree snapshots, whitelist comparison, and manifest generation and verification. It does not contain game parsers, game files, translations, compilers, deployment, or rollback code.
+Small Python utilities for localization workflows. This extraction contains path safety, SHA-256 hashing, tree snapshots, whitelist comparison, manifest generation and verification, and a conservative adapter for a documented subset of BGI text-slot calls. It does not contain game files, actual translations, a BGI compiler, deployment, or rollback code.
 
 ## Requirements
 
@@ -19,6 +19,9 @@ Install for local development:
 Verify the synthetic example:
 
     python examples/verify_sample.py
+    python examples/bgi/translate_synthetic.py
+
+For BGI slot extraction and its strict writeback boundary, see [bgi-adapter.md](bgi-adapter.md).
 
 ## Basic use
 
@@ -40,6 +43,6 @@ Path comparison keys are case-insensitive to match Windows deployment semantics.
 
 ## Safety scope
 
-These helpers inspect paths and manifests. They do not deploy, delete, or restore files. A successful manifest check proves listed bytes match recorded sizes and SHA-256 values; it does not prove game-build compatibility or translation correctness. Avoid concurrent filesystem changes during checks.
+The path and manifest helpers inspect files but do not deploy, delete, or restore them. The BGI adapter only recognizes explicit schemas and does not compile scripts or validate game-build compatibility, language quality, or runtime layout. A successful manifest check proves listed bytes match recorded sizes and SHA-256 values; it does not prove translation correctness. Avoid concurrent filesystem changes during checks.
 
 This is an initial extraction, not a tagged release. Choose and review a license before publication.

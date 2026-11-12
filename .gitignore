@@ -24,6 +24,7 @@ dist/
 *.backup
 *.txt
 !examples/sample_payload/sample.txt
+!examples/bgi/synthetic_script.txt
 *_candidate*.json
 *translation*.json
 *glossary*.json
