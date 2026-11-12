@@ -25,7 +25,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 术语表管理
 - 游戏脚本编译与验证
 - SHA-256 文件完整性校验
-- PowerShell 安全部署与回滚
+- 有固定快照、独立备份和事务日志的保守部署与恢复原语
 - Steam 汉化覆盖包制作
 
 ## 仓库目标
@@ -42,12 +42,13 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 
 ## 首批可运行 Python 工具
 
-本仓库提供通用文件安全工具和一个保守的 BGI 脚本文本槽适配器：Windows 路径规范化与白名单差异检查、流式 SHA-256、JSON manifest 生成和验证，以及按显式调用参数规则识别 BGI 正文、姓名、菜单和 UI 字符串。代码、合成示例及自动化测试位于 `src/`、`examples/` 和 `tests/`。
+本仓库提供通用文件安全工具、保守的 BGI 脚本文本槽适配器，以及严格白名单部署事务原语：Windows 路径规范化与白名单差异检查、流式 SHA-256、JSON manifest 生成和验证、按显式调用参数规则识别 BGI 文本槽，以及基于固定快照、独立备份、逐文件日志和全目录差异审计的部署与恢复。代码、合成示例及自动化测试位于 `src/`、`examples/` 和 `tests/`。
 
 - 安装与使用：[`docs/python-toolkit-quickstart.md`](docs/python-toolkit-quickstart.md)
 - 来源与改造说明：[`docs/code-migration.md`](docs/code-migration.md)
 - 测试结果：[`docs/test-report.md`](docs/test-report.md)
 - 公开安全检查：[`docs/publication-safety-review.md`](docs/publication-safety-review.md)
 - BGI 适配器说明：[`docs/bgi-adapter.md`](docs/bgi-adapter.md)
+- 部署事务、崩溃恢复及限制：[`docs/deployment-transactions.md`](docs/deployment-transactions.md)
 
-在仓库根目录运行测试：`python -m unittest discover -s tests -v`。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。仓库不包含游戏文件、真实游戏文本、译文、部署器或第三方编译器。
+在仓库根目录运行测试：`python -m unittest discover -s tests -v`。部署事务只作用于调用方提供的现有文件白名单，不负责完整安装器功能，也不会猜测版本或部署目标。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。仓库不包含游戏文件、真实游戏文本、译文或第三方编译器。

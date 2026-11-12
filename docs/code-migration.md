@@ -5,6 +5,8 @@
 - Windows path normalization, reparse-point checks, tree snapshots, and whitelist comparisons were adapted from the reviewed `path_guard_batch25.ps1` asset.
 - Streaming SHA-256 and file-tree fingerprint behavior were adapted from the reviewed `lib/project.mjs` asset.
 - Manifest generation and validation consolidate patterns found in the reviewed project manifest and hash-audit helpers. The example manifest contains only synthetic data.
+- The deployment transaction module refactors the actually used B25 backup, deploy, rollback, and path-guard behavior. It carries forward fixed whole-tree snapshots, explicit allowlists, per-target original/candidate digests, independently verified backup manifests, a durable per-file journal, atomic same-filesystem replacement, post-deploy tree comparison, and hash-classified recovery.
+- B25 failure reviews informed regression coverage for the empty `.NET File.Replace` backup argument, mismatched snapshot/whitelist path roots, and rollback after partial replacement. The generic implementation uses standard-library `os.replace` with verified staged files and separate independent backups rather than copying the PowerShell call site.
 
 The Python modules in this package are new, standard-library implementations of those reviewed behaviors. They are not copied source files and do not include project-specific logic.
 
@@ -12,6 +14,8 @@ The Python modules in this package are new, standard-library implementations of 
 
 - Removed project roots, drive-specific settings, game names, source fingerprints, and translation content.
 - Replaced project-specific deployment inputs with explicit caller-supplied roots and relative paths.
+- Replaced project paths and authorization details with a Python API that requires caller-provided version tokens, fixed snapshots, and exact per-file hashes. Transaction evidence is stored outside both payload and target roots.
+- Added real subprocess termination tests: child processes perform an actual atomic replacement and exit immediately without cleanup; another process resumes from the journal. A separate test kills a process during rollback and resumes it again.
 - Added Windows case-folded comparison keys, parent-traversal rejection, reparse-point checks, streaming SHA-256, duplicate-target detection, and atomic manifest writes.
 - Added synthetic temporary-directory tests for path handling, whitelist changes/additions/removals, hashes, missing files, changed content, and duplicate manifest entries.
 
@@ -27,4 +31,4 @@ No original Japanese/English scripts, translated text, compiled game files, font
 
 ## Limitations and licensing
 
-These checks do not prevent time-of-check/time-of-use races if another process changes the tree after validation. This package is not a deployment engine. Review source licensing and repository policy before public release; choose and add a license before treating the repository as an open-source release.
+The path and manifest helpers do not prevent time-of-check/time-of-use races by themselves. The deployment primitive adds repeated checks and durable recovery evidence but still requires a quiescent target and has the limitations documented in `deployment-transactions.md`. Review source licensing and repository policy before public release.

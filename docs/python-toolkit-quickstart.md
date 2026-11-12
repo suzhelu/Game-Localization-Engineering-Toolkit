@@ -1,6 +1,6 @@
 # Game Localization Engineering Toolkit
 
-Small Python utilities for localization workflows. This extraction contains path safety, SHA-256 hashing, tree snapshots, whitelist comparison, manifest generation and verification, and a conservative adapter for a documented subset of BGI text-slot calls. It does not contain game files, actual translations, a BGI compiler, deployment, or rollback code.
+Small Python utilities for localization workflows. This extraction contains path safety, SHA-256 hashing, tree snapshots, whitelist comparison, manifest generation and verification, a conservative adapter for a documented subset of BGI text-slot calls, and a fail-closed transaction primitive for explicitly allowlisted existing files. It does not contain game files, actual translations, or a BGI compiler.
 
 ## Requirements
 
@@ -20,8 +20,10 @@ Verify the synthetic example:
 
     python examples/verify_sample.py
     python examples/bgi/translate_synthetic.py
+    python examples/deployment/transaction_demo.py
 
 For BGI slot extraction and its strict writeback boundary, see [bgi-adapter.md](bgi-adapter.md).
+For backup, journaling, crash recovery and limitations, see [deployment-transactions.md](deployment-transactions.md).
 
 ## Basic use
 
@@ -43,6 +45,6 @@ Path comparison keys are case-insensitive to match Windows deployment semantics.
 
 ## Safety scope
 
-The path and manifest helpers inspect files but do not deploy, delete, or restore them. The BGI adapter only recognizes explicit schemas and does not compile scripts or validate game-build compatibility, language quality, or runtime layout. A successful manifest check proves listed bytes match recorded sizes and SHA-256 values; it does not prove translation correctness. Avoid concurrent filesystem changes during checks.
+The deployment transaction helper changes only existing files in an explicit allowlist. It refuses unknown hashes, corrupt backups, root mismatches, and outside-tree changes. Crash recovery is limited to the documented states and supported local filesystems; see its dedicated guide before use. It is not a turnkey installer and does not preserve every platform-specific metadata type. The BGI adapter only recognizes explicit schemas and does not compile scripts or validate game-build compatibility, language quality, or runtime layout. A successful manifest check proves listed bytes match recorded sizes and SHA-256 values; it does not prove translation correctness. Quiesce other writers during filesystem operations.
 
-This is an initial extraction, not a tagged release. Choose and review a license before publication.
+This is a local development toolkit, not a tagged release. Review the repository license scope and the documented deployment limits before integrating it into a project.

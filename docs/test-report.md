@@ -8,10 +8,14 @@ Command:
 python -m unittest discover -s tests -v
 ```
 
-Result: **45 tests passed, 0 failed, 0 skipped**.
+Result: **68 tests passed, 0 failed, 0 skipped**.
 
-The suite covers known SHA-256 vectors and content changes; relative and absolute paths; Chinese and space-containing names; case-insensitive Windows comparison; traversal, device namespace, alternate data stream, trailing-dot/space and reserved-device-name rejection; symbolic-link/junction escape and reparse ancestors; whitelist changes, additions and removals; manifest creation, duplicate rejection, missing files and hash/size mismatch; and synthetic BGI extraction, slot identity, categories, locations, language choices, opaque resources, escaped strings, safe writeback, malformed inputs, unresolved calls, standalone literal reporting, and structural invariants.
+This is the original 45-test suite plus 23 deployment transaction regression tests; no prior tests were removed or weakened.
 
-The synthetic manifest example was also verified successfully with `python examples/verify_sample.py`. The synthetic BGI example was run successfully with `python examples/bgi/translate_synthetic.py`.
+The suite covers known SHA-256 vectors and content changes; relative and absolute paths; Chinese and space-containing names; case-insensitive Windows comparison; traversal, device namespace, alternate data stream, trailing-dot/space and reserved-device-name rejection; symbolic-link/junction escape and reparse ancestors; whitelist changes, additions and removals; manifest creation, duplicate rejection, missing files and hash/size mismatch; synthetic BGI extraction, slot identity, categories, locations, language choices, opaque resources, escaped strings, safe writeback, malformed inputs, unresolved calls, standalone literal reporting, and structural invariants; and deployment version/hash gates, fixed-root snapshots, explicit allowlists, backup integrity, atomic replacement, rollback, unknown-state refusal, and full-tree audits.
+
+Deployment interruption coverage starts separate Python worker processes and terminates them with `os._exit` immediately after actual file replacement. Tests verify recovery after a partially applied deployment and after a process is killed partway through rollback. All deployment tests use temporary directories and synthetic bytes.
+
+The synthetic manifest example was also verified successfully with `python examples/verify_sample.py`. The synthetic BGI example was run successfully with `python examples/bgi/translate_synthetic.py`. The synthetic deployment example was run successfully with `python examples/deployment/transaction_demo.py`.
 
 The reparse tests used Windows directory junctions because this environment does not grant ordinary symbolic-link creation privileges. The code rejects both symlinks and Windows reparse points.
