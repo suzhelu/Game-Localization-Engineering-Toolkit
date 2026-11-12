@@ -5,7 +5,7 @@ Small Python utilities for localization workflows. This extraction contains path
 ## Requirements
 
 - Python 3.10 or newer.
-- Runtime and tests use only the Python standard library.
+- Runtime code uses only the Python standard library. One synthetic .NET binding regression invokes host PowerShell when available and is skipped when PowerShell is unavailable.
 - Building/installing a wheel uses the setuptools build backend declared in pyproject.toml.
 
 Run tests from this directory:
@@ -23,11 +23,13 @@ Verify the synthetic example:
     python examples/deployment/transaction_demo.py
     python examples/overlay_package/build_synthetic_package.py
     python examples/translation/mock_batch.py
+    python examples/compilation/mock_build.py
 
 For BGI slot extraction and its strict writeback boundary, see [bgi-adapter.md](bgi-adapter.md).
 For backup, journaling, crash recovery and limitations, see [deployment-transactions.md](deployment-transactions.md).
 For explicit-list ZIP overlay packaging and release auditing, see [overlay-packages.md](overlay-packages.md). Packaging never installs files into a target directory.
 For resumable provider-neutral translation batches and the required human-review gate, see [translation-workflow.md](translation-workflow.md). The sample provider is local and does not call an AI service.
+For compiler command configuration, reviewed-source gates, MGSC envelope validation, evidence levels, and build publication limits, see [compilation-adapters.md](compilation-adapters.md). The example uses only a Mock Compiler; no real compiler is bundled or called.
 
 ## Basic use
 

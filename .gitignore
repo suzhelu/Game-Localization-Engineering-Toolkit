@@ -29,6 +29,10 @@ dist/
 *translation*.json
 provider-config*.json
 ai-provider*.json
+compiler-config*.json
+*.compilation-state.json
+*build-report.private.json
+.locbuild-*/
 *glossary*.json
 backup/
 backups/

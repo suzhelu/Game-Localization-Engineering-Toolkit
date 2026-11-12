@@ -28,6 +28,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 有固定快照、独立备份和事务日志的保守部署与恢复原语
 - 从调用方显式清单构建并审计确定性 ZIP 覆盖包（不负责安装）
 - 基于槽位 ID 的 AI 辅助翻译批次、术语约束、断点续跑与人工审核门槛
+- 显式 CompilerAdapter、编译证据分级、有限的 MGSC v1 只读外壳检查与可审计构建
 
 ## 仓库目标
 
@@ -53,5 +54,6 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 部署事务、崩溃恢复及限制：[`docs/deployment-transactions.md`](docs/deployment-transactions.md)
 - 确定性覆盖包格式、构建和审计：[`docs/overlay-packages.md`](docs/overlay-packages.md)
 - AI 翻译工作流、术语表和质量审核：[`docs/translation-workflow.md`](docs/translation-workflow.md)
+- 编译适配器、MGSC v1 验证范围与构建证据：[`docs/compilation-adapters.md`](docs/compilation-adapters.md)
 
-在仓库根目录运行测试：`python -m unittest discover -s tests -v`。部署事务只作用于调用方提供的现有文件白名单，不负责完整安装器功能，也不会猜测版本或部署目标。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。仓库不包含游戏文件、真实游戏文本、译文或第三方编译器。
+在仓库根目录运行测试：`python -m unittest discover -s tests -v`。部署事务只作用于调用方提供的现有文件白名单，不负责完整安装器功能，也不会猜测版本或部署目标。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。编译模块只运行调用方配置的本地工具，不捆绑编译器；MGSC v1 检查限于有项目代码证据的头部/表边界，负载保持不透明，静态构建不等于运行时验收。仓库不包含游戏文件、真实游戏文本、译文、编译器或游戏程序集。
