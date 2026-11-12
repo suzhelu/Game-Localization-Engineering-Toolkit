@@ -10,13 +10,45 @@ All configured project paths are relative to the project directory and pass thro
 
 ## Windows PowerShell quick start
 
-From the repository root, create a dedicated environment with an installed Python 3.10+ interpreter. If `python` is available on `PATH`:
+From the repository root, first check for a working Python 3.10+ interpreter. This PowerShell check runs each candidate instead of trusting a command or Microsoft Store alias exists: it tries `python`, then the optional `py` launcher, and finally asks for the installed interpreter's full path:
 
 ```powershell
-python -m venv .venv
+$venvCreated = $false
+$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCommand) {
+    & $pythonCommand.Source -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        & $pythonCommand.Source --version
+        & $pythonCommand.Source -m venv .venv
+        if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with python failed.' }
+        $venvCreated = $true
+    }
+}
+
+if (-not $venvCreated) {
+    $pyCommand = Get-Command py -ErrorAction SilentlyContinue
+    if ($pyCommand) {
+        & $pyCommand.Source -3.10 -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            & $pyCommand.Source -3.10 --version
+            & $pyCommand.Source -3.10 -m venv .venv
+            if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with py failed.' }
+            $venvCreated = $true
+        }
+    }
+}
+
+if (-not $venvCreated) {
+    $pythonExe = Read-Host 'Enter the full path to python.exe (Python 3.10+)'
+    & $pythonExe -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+    if ($LASTEXITCODE -ne 0) { throw 'The selected path is not a working Python 3.10+ interpreter.' }
+    & $pythonExe --version
+    & $pythonExe -m venv .venv
+    if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with the selected interpreter failed.' }
+}
 ```
 
-If Python is not on `PATH`, invoke the installed interpreter by its local executable path instead of `python`. Install the project and run its entry point from the environment explicitly; this avoids relying on activation policy or a globally installed `localize` command:
+The `py` launcher is optional. If `python` is a non-working alias, too old, or unavailable, the check proceeds to `py`; if that also fails or is absent, enter the full path to an installed Python 3.10+ `python.exe`. Install the project and run its entry point from the environment explicitly; this avoids relying on activation policy or a globally installed `localize` command:
 
 ```powershell
 & .\.venv\Scripts\python.exe -m pip install -e .

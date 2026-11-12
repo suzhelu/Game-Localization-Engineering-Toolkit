@@ -8,10 +8,43 @@ Small Python utilities for localization workflows. This extraction contains path
 - Runtime code uses only the Python standard library. One synthetic .NET binding regression invokes host PowerShell when available and is skipped when PowerShell is unavailable.
 - Building/installing a wheel uses the setuptools build backend declared in pyproject.toml.
 
-Install for local development in a fresh Windows PowerShell environment (Python 3.10+ must be installed; if its executable is not on `PATH`, use its full local path for the `venv` creation command):
+Install for local development in a fresh Windows PowerShell environment. Python 3.10+ must be installed. The following runs each candidate to avoid trusting a missing command or Microsoft Store alias: it tries `python`, then the optional `py` launcher, and finally prompts for the full path to `python.exe`:
 
 ```powershell
-python -m venv .venv
+$venvCreated = $false
+$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCommand) {
+    & $pythonCommand.Source -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+    if ($LASTEXITCODE -eq 0) {
+        & $pythonCommand.Source --version
+        & $pythonCommand.Source -m venv .venv
+        if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with python failed.' }
+        $venvCreated = $true
+    }
+}
+
+if (-not $venvCreated) {
+    $pyCommand = Get-Command py -ErrorAction SilentlyContinue
+    if ($pyCommand) {
+        & $pyCommand.Source -3.10 -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+        if ($LASTEXITCODE -eq 0) {
+            & $pyCommand.Source -3.10 --version
+            & $pyCommand.Source -3.10 -m venv .venv
+            if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with py failed.' }
+            $venvCreated = $true
+        }
+    }
+}
+
+if (-not $venvCreated) {
+    $pythonExe = Read-Host 'Enter the full path to python.exe (Python 3.10+)'
+    & $pythonExe -c "import sys; raise SystemExit(0 if sys.version_info >= (3, 10) else 1)" 2>$null
+    if ($LASTEXITCODE -ne 0) { throw 'The selected path is not a working Python 3.10+ interpreter.' }
+    & $pythonExe --version
+    & $pythonExe -m venv .venv
+    if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation with the selected interpreter failed.' }
+}
+
 & .\.venv\Scripts\python.exe -m pip install -e .
 & .\.venv\Scripts\localize.exe --help
 ```
