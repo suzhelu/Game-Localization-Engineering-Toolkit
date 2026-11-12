@@ -1,0 +1,13 @@
+{
+  "schema_version": 1,
+  "metadata": {
+    "purpose": "synthetic example only"
+  },
+  "files": [
+    {
+      "path": "sample_payload/sample.txt",
+      "size_bytes": 55,
+      "sha256": "66DB9294D2B5252A1289F628334EC9C7890F34835E78834E168956110FBDDCC3"
+    }
+  ]
+}
