@@ -22,10 +22,12 @@ Verify the synthetic example:
     python examples/bgi/translate_synthetic.py
     python examples/deployment/transaction_demo.py
     python examples/overlay_package/build_synthetic_package.py
+    python examples/translation/mock_batch.py
 
 For BGI slot extraction and its strict writeback boundary, see [bgi-adapter.md](bgi-adapter.md).
 For backup, journaling, crash recovery and limitations, see [deployment-transactions.md](deployment-transactions.md).
 For explicit-list ZIP overlay packaging and release auditing, see [overlay-packages.md](overlay-packages.md). Packaging never installs files into a target directory.
+For resumable provider-neutral translation batches and the required human-review gate, see [translation-workflow.md](translation-workflow.md). The sample provider is local and does not call an AI service.
 
 ## Basic use
 

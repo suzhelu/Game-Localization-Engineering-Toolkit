@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "game-localization-engineering-toolkit"
 version = "0.1.0"
-description = "File safety, BGI text-slot adaptation, deployment transactions, and deterministic overlay packaging"
+description = "File safety, BGI text slots, deployment, deterministic packaging, and reviewed translation workflows"
 requires-python = ">=3.10"
 dependencies = []
 

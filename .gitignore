@@ -27,6 +27,8 @@ dist/
 !examples/bgi/synthetic_script.txt
 *_candidate*.json
 *translation*.json
+provider-config*.json
+ai-provider*.json
 *glossary*.json
 backup/
 backups/
