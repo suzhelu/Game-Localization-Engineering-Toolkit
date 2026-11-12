@@ -41,3 +41,9 @@ No original Japanese/English scripts, translated text, compiled game files, font
 ## Limitations and licensing
 
 The path and manifest helpers do not prevent time-of-check/time-of-use races by themselves. The deployment primitive adds repeated checks and durable recovery evidence but still requires a quiescent target and has the limitations documented in `deployment-transactions.md`. Review source licensing and repository policy before public release.
+
+## CLI orchestration
+
+The seventh batch adds a thin `localize` entry point and strict versioned JSON project configuration. It composes the repository's public BGI adapter, translation task/store/review APIs, compiler build and validator APIs, manifest checks, overlay packager, and deployment transaction/recovery APIs. It does not duplicate a parser, provider, compiler, packager, or transaction implementation. Project configuration separates common workflow settings from adapter-specific options, fingerprints source/reference/glossary/rules/compiler inputs, and records stage and operation state locally. The default provider and compiler are synthetic mocks; reviewer approval remains explicit and mandatory, and initialized projects keep deployment disabled.
+
+No game-specific terms, character names, story content, absolute paths, original scripts, compiled artifacts, or external compiler binaries were migrated. The distinct translation glossary and game compiled-script index remain separate: the CLI consumes a configurable glossary and does not create or modify a compiled index. CLI tests and the end-to-end demonstration use synthetic data in temporary directories.

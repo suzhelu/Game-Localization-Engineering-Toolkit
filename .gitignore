@@ -33,6 +33,7 @@ compiler-config*.json
 *.compilation-state.json
 *build-report.private.json
 .locbuild-*/
+.localize/
 *glossary*.json
 backup/
 backups/

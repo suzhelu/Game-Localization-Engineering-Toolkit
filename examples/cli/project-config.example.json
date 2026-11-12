@@ -1,0 +1,55 @@
+{
+  "schema_version": 1,
+  "project": {"name": "Synthetic Localization Demo"},
+  "general": {
+    "adapter": "bgi",
+    "source_language": "ja",
+    "target_language": "zh-CN",
+    "batch_size": 4,
+    "rule_version": "demo-rules-v1",
+    "prompt_template": "Translate {source_text} from {source_language} to {target_language}. Preserve placeholders and do not add facts."
+  },
+  "game_specific": {"adapter_options": {}},
+  "inputs": {
+    "scripts": [
+      {"id": "synthetic-script", "source": "input/synthetic.txt", "output": "scripts/synthetic.mg"}
+    ]
+  },
+  "translation": {"provider": "mock", "mock_prefix": "[mock translation] "},
+  "compiler": {
+    "kind": "mock",
+    "id": "synthetic-mock-compiler",
+    "version": "mock-1",
+    "executable": null,
+    "arguments": [],
+    "version_arguments": [],
+    "cwd": null,
+    "timeout_seconds": 30
+  },
+  "validation": {
+    "compiled_format": "mgsc-v1",
+    "require_human_review": true,
+    "require_resolved_structure": true,
+    "original_roundtrip_required": false
+  },
+  "paths": {
+    "glossary": "config/glossary.json",
+    "rules": "config/rules.txt",
+    "state_dir": ".localize",
+    "build_dir": "build",
+    "package_dir": "releases"
+  },
+  "package": {
+    "name": "synthetic-overlay",
+    "version": "0.1.0",
+    "files": [{"build_path": "scripts/synthetic.mg", "archive_path": "scripts/synthetic.mg"}]
+  },
+  "deployment": {
+    "enabled": false,
+    "target_root": null,
+    "transaction_root": null,
+    "expected_version": null,
+    "fixed_snapshot": null,
+    "targets": []
+  }
+}
