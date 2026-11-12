@@ -36,6 +36,10 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 
 本仓库不提供游戏原版文件、受保护的游戏脚本、游戏资源或未经授权的第三方工具。
 
+## 许可证
+
+本仓库根目录的 MIT License 适用于 `suzhelu` 有权许可的仓库工具代码及文档。该许可证不授予任何第三方游戏、游戏资源、原版脚本、译文、商标或其他受保护内容的使用权。第三方内容仍受其各自权利人的条款约束。
+
 ## 首批可运行 Python 工具
 
 本仓库新增一组通用文件安全工具：Windows 路径规范化与白名单差异检查、流式 SHA-256、JSON manifest 生成和验证。代码、合成示例及自动化测试位于 `src/`、`examples/` 和 `tests/`。
