@@ -10,12 +10,18 @@ All configured project paths are relative to the project directory and pass thro
 
 ## Windows PowerShell quick start
 
-From the repository root, install the package in editable mode and initialize a new synthetic or user-owned project:
+From the repository root, create a dedicated environment with an installed Python 3.10+ interpreter. If `python` is available on `PATH`:
 
 ```powershell
-py -m pip install -e .
-localize init .\demo-project --name "Synthetic Demo"
-localize inspect --project .\demo-project
+python -m venv .venv
+```
+
+If Python is not on `PATH`, invoke the installed interpreter by its local executable path instead of `python`. Install the project and run its entry point from the environment explicitly; this avoids relying on activation policy or a globally installed `localize` command:
+
+```powershell
+& .\.venv\Scripts\python.exe -m pip install -e .
+& .\.venv\Scripts\localize.exe init .\demo-project --name "Synthetic Demo"
+& .\.venv\Scripts\localize.exe inspect --project .\demo-project
 ```
 
 Edit `localize.json` and add explicit script input/output mappings. Put source files, optional reference files, glossary JSON, and rules inside the project directory. The initialized settings use BGI, Mock translation, Mock compilation, mandatory human approval, an explicit packaging list, and disabled deployment.
@@ -23,15 +29,15 @@ Edit `localize.json` and add explicit script input/output mappings. Put source f
 The normal sequence is:
 
 ```powershell
-localize extract --project .\demo-project
-localize translate --project .\demo-project
-localize review --project .\demo-project
-localize review --project .\demo-project --approve-slot "SLOT-ID" --reviewer "your-review-id"
-localize compile --project .\demo-project
-localize verify --project .\demo-project
-localize package --project .\demo-project
-localize verify --project .\demo-project
-localize status --project .\demo-project
+& .\.venv\Scripts\localize.exe extract --project .\demo-project
+& .\.venv\Scripts\localize.exe translate --project .\demo-project
+& .\.venv\Scripts\localize.exe review --project .\demo-project
+& .\.venv\Scripts\localize.exe review --project .\demo-project --approve-slot "SLOT-ID" --reviewer "your-review-id"
+& .\.venv\Scripts\localize.exe compile --project .\demo-project
+& .\.venv\Scripts\localize.exe verify --project .\demo-project
+& .\.venv\Scripts\localize.exe package --project .\demo-project
+& .\.venv\Scripts\localize.exe verify --project .\demo-project
+& .\.venv\Scripts\localize.exe status --project .\demo-project
 ```
 
 `review` without an action lists current source, candidate, validation issues, and approval state. Approval/rejection is explicit per slot and requires a reviewer identifier. The Mock Provider never approves. Compilation fails closed until every current slot has an approved result, and it stages content through the existing adapter's safe writeback gate.
@@ -40,7 +46,7 @@ To run the complete synthetic demonstration without installing the CLI:
 
 ```powershell
 $env:PYTHONPATH = (Join-Path (Get-Location).Path 'src')
-py .\examples\cli\end_to_end.py
+& .\.venv\Scripts\python.exe .\examples\cli\end_to_end.py
 ```
 
 The example creates its project in a temporary directory, explicitly approves its synthetic slot, builds with the Mock Compiler, verifies outputs, creates a synthetic overlay ZIP, and removes the temporary tree on exit.

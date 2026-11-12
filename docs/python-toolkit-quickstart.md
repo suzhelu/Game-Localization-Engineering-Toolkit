@@ -8,22 +8,27 @@ Small Python utilities for localization workflows. This extraction contains path
 - Runtime code uses only the Python standard library. One synthetic .NET binding regression invokes host PowerShell when available and is skipped when PowerShell is unavailable.
 - Building/installing a wheel uses the setuptools build backend declared in pyproject.toml.
 
-Run tests from this directory:
+Install for local development in a fresh Windows PowerShell environment (Python 3.10+ must be installed; if its executable is not on `PATH`, use its full local path for the `venv` creation command):
 
-    python -m unittest discover -s tests -v
+```powershell
+python -m venv .venv
+& .\.venv\Scripts\python.exe -m pip install -e .
+& .\.venv\Scripts\localize.exe --help
+```
 
-Install for local development:
+The CLI is installed into that environment. Invoke `localize` after activating the environment, or use `& .\.venv\Scripts\localize.exe` explicitly as shown above. PowerShell activation may be restricted by local execution policy, so explicit invocation does not require activation.
 
-    python -m pip install -e .
+Run the tests and synthetic examples with the environment's interpreter:
 
-Verify the synthetic example:
-
-    python examples/verify_sample.py
-    python examples/bgi/translate_synthetic.py
-    python examples/deployment/transaction_demo.py
-    python examples/overlay_package/build_synthetic_package.py
-    python examples/translation/mock_batch.py
-    python examples/compilation/mock_build.py
+```powershell
+& .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+& .\.venv\Scripts\python.exe examples/verify_sample.py
+& .\.venv\Scripts\python.exe examples/bgi/translate_synthetic.py
+& .\.venv\Scripts\python.exe examples/deployment/transaction_demo.py
+& .\.venv\Scripts\python.exe examples/overlay_package/build_synthetic_package.py
+& .\.venv\Scripts\python.exe examples/translation/mock_batch.py
+& .\.venv\Scripts\python.exe examples/compilation/mock_build.py
+```
 
 For BGI slot extraction and its strict writeback boundary, see [bgi-adapter.md](bgi-adapter.md).
 For backup, journaling, crash recovery and limitations, see [deployment-transactions.md](deployment-transactions.md).
