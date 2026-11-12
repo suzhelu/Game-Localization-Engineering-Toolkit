@@ -4,7 +4,7 @@ Review date: 2026-11-12
 
 ## Scope checked
 
-Reviewed every file in this standalone toolkit directory, including the package, tests, synthetic examples, documentation, and project metadata. Source behaviors are documented in `code-migration.md`, including the BGI adapter and the deployment behavior adapted from the actually used project scripts.
+Reviewed every file in this standalone toolkit directory, including the package, tests, synthetic examples, documentation, and project metadata. Source behaviors are documented in `code-migration.md`, including the BGI adapter, deployment behavior, and overlay packaging behavior adapted from the actually used project scripts.
 
 ## Findings
 
@@ -19,6 +19,7 @@ Reviewed every file in this standalone toolkit directory, including the package,
 - The BGI adapter is an adaptation of the project's own actually used `lib/script.mjs` and parser tests, not copied from a third-party parser. It contains no compiler or game binary.
 - The deployment module is a standard-library refactor of audited project-owned PowerShell behaviors. It includes no game-specific paths, candidate manifests, transaction logs, game content, or PowerShell source. Process-crash tests use only synthetic bytes under temporary directories.
 - The deployment primitive stops for unknown target hashes, corrupt or missing backup proofs, root mismatch, malformed transaction state, or non-whitelisted changes. It does not claim recovery from power loss or arbitrary storage failures. It cannot prevent an uncooperative concurrent writer from racing between checks and replacement; callers must quiesce the target tree.
+- The overlay packager requires a caller-provided explicit list with expected hashes; it does not scan and collect game resources or install the resulting ZIP. Archive and audit tests use only generated synthetic payload bytes in temporary directories. Corrupt archives, traversal, duplicate paths, missing files, hash mismatches, and partial-build cleanup are covered.
 - A scan of the proposed public files found no API keys, credential values, runtime personal paths, original game text, translated game text, or forbidden game file extensions. Migration provenance uses generic asset descriptions only; source-machine paths are excluded.
 - The repository MIT License is scoped in the README to code and documentation the named holder is entitled to license; it does not grant rights to third-party game content.
 

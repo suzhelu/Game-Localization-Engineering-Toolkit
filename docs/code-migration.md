@@ -7,6 +7,7 @@
 - Manifest generation and validation consolidate patterns found in the reviewed project manifest and hash-audit helpers. The example manifest contains only synthetic data.
 - The deployment transaction module refactors the actually used B25 backup, deploy, rollback, and path-guard behavior. It carries forward fixed whole-tree snapshots, explicit allowlists, per-target original/candidate digests, independently verified backup manifests, a durable per-file journal, atomic same-filesystem replacement, post-deploy tree comparison, and hash-classified recovery.
 - B25 failure reviews informed regression coverage for the empty `.NET File.Replace` backup argument, mismatched snapshot/whitelist path roots, and rollback after partial replacement. The generic implementation uses standard-library `os.replace` with verified staged files and separate independent backups rather than copying the PowerShell call site.
+- The overlay-package helper distills the actually used Steam bundle preparation, explicit payload mapping, source-hash audit, release manifest, SHA-256 sidecar, and final archive checks. It does not carry over the project's fixed file list, game-specific compatibility rules, translations, or installation behavior. Payload selection is explicit at the API boundary; package creation and installation remain separate operations.
 
 The Python modules in this package are new, standard-library implementations of those reviewed behaviors. They are not copied source files and do not include project-specific logic.
 
