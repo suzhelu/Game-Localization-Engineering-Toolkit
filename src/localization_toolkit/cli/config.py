@@ -62,8 +62,10 @@ class Project:
         for key in ("adapter", "source_language", "target_language", "rule_version", "prompt_template"):
             if not _nonempty(general.get(key)):
                 raise ProjectConfigError(f"general.{key} must be a non-empty string")
-        if general["adapter"] != "bgi":
-            raise ProjectConfigError(f"Unknown text adapter {general['adapter']!r}; available adapters: bgi")
+        from ..adapters.registry import default_registry
+        registry = default_registry()
+        if general["adapter"] not in registry.adapter_ids:
+            raise ProjectConfigError(f"Unknown text adapter {general['adapter']!r}; available adapters: {', '.join(registry.adapter_ids)}")
         if type(general["batch_size"]) is not int or general["batch_size"] < 1:
             raise ProjectConfigError("general.batch_size must be a positive integer")
         game_specific = self.config["game_specific"]

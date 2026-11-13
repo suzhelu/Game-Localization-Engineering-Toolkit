@@ -8,7 +8,7 @@ import uuid
 from pathlib import Path
 from typing import Any
 
-from ..adapters.bgi import BgiAdapter, CallSchema, OpaqueCallSchema, TextPair
+from ..adapters.registry import RegisteredTextAdapter, default_registry
 from ..compilation import (
     BuildMode, BuildPlan, BuildTarget, CommandLineCompilerAdapter, MGSCV1Validator,
     MockCompilerAdapter, build, capture_original_source, prepare_reviewed_source,
@@ -35,36 +35,12 @@ def _canonical(value: object) -> bytes:
     return json.dumps(value, ensure_ascii=False, sort_keys=True, separators=(",", ":")).encode("utf-8")
 
 
-def _adapter(project: Project) -> BgiAdapter:
-    options = project.config["game_specific"]["adapter_options"]
-    allowed = {"schemas", "opaque_commands"}
-    if set(options) - allowed:
-        raise WorkflowError(f"Unsupported BGI adapter options: {sorted(set(options) - allowed)}")
-    schemas: dict[str, CallSchema] | None = None
-    opaque: dict[str, OpaqueCallSchema] = {}
-    if "schemas" in options:
-        rows = options["schemas"]
-        if not isinstance(rows, dict):
-            raise WorkflowError("game_specific.adapter_options.schemas must be an object")
-        schemas = {}
-        for command, row in rows.items():
-            if not isinstance(row, dict) or set(row) != {"arity", "text_pairs"} or type(row["arity"]) is not int or not isinstance(row["text_pairs"], list):
-                raise WorkflowError(f"Invalid schema configuration for {command}")
-            pairs = []
-            for pair in row["text_pairs"]:
-                if not isinstance(pair, dict) or set(pair) != {"source_argument", "target_argument", "role"}:
-                    raise WorkflowError(f"Invalid text pair in schema {command}")
-                pairs.append(TextPair(pair["source_argument"], pair["target_argument"], pair["role"]))
-            schemas[command] = CallSchema(row["arity"], tuple(pairs))
-    if "opaque_commands" in options:
-        rows = options["opaque_commands"]
-        if not isinstance(rows, dict):
-            raise WorkflowError("game_specific.adapter_options.opaque_commands must be an object")
-        for command, row in rows.items():
-            if not isinstance(row, dict) or set(row) != {"arity", "non_text_string_arguments"} or type(row["arity"]) is not int or not isinstance(row["non_text_string_arguments"], list) or any(type(i) is not int for i in row["non_text_string_arguments"]):
-                raise WorkflowError(f"Invalid opaque command configuration for {command}")
-            opaque[command] = OpaqueCallSchema(row["arity"], frozenset(row["non_text_string_arguments"]))
-    return BgiAdapter(schemas=schemas, opaque_commands=opaque or None)
+def _adapter(project: Project) -> RegisteredTextAdapter:
+    try:
+        return default_registry().create(
+            project.config["general"]["adapter"], project.config["game_specific"]["adapter_options"])
+    except Exception as exc:
+        raise WorkflowError(f"Could not create configured adapter: {exc}") from exc
 
 
 def _glossary(project: Project) -> Glossary:

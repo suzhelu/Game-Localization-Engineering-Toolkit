@@ -5,7 +5,9 @@ import argparse
 import json
 import sys
 from typing import Sequence
+from pathlib import Path
 
+from ..adapters.registry import default_registry
 from .config import Project
 from .workflow import (
     WorkflowError, compile_project, deploy_command, extract, initialize, inspect_project,
@@ -20,6 +22,15 @@ def _project_option(parser: argparse.ArgumentParser) -> None:
 def parser() -> argparse.ArgumentParser:
     root = argparse.ArgumentParser(prog="localize", description="Project workflow CLI using the toolkit's existing adapters")
     commands = root.add_subparsers(dest="command", required=True)
+
+    command = commands.add_parser("adapters", help="List registered adapters and discovered plugin IDs")
+    command.add_argument("--load", help="Explicitly load one trusted installed adapter plugin and show its metadata")
+    command = commands.add_parser("probe", help="Read-only probe of decoded UTF-8 script text")
+    command.add_argument("file")
+    command.add_argument("--adapter", help="Probe only this explicit adapter ID")
+    command.add_argument("--project", help="Use adapter ID/options from localize.json")
+    command.add_argument("--include-plugins", action="store_true",
+                         help="Load all installed adapter plugins to check for ambiguous matches")
 
     command = commands.add_parser("init", help="Create a portable project skeleton without game-specific defaults")
     command.add_argument("path", nargs="?", default=".")
@@ -69,6 +80,40 @@ def main(argv: Sequence[str] | None = None) -> int:
             _dump({"status": "initialized", "project_directory": str(path), "config": "localize.json",
                    "next_steps": ["add explicit entries to inputs.scripts", "localize inspect"]})
             return 0
+        if args.command == "adapters":
+            registry = default_registry()
+            if args.load:
+                registry.create(args.load)
+            _dump({"schema_version": 1,
+                   "registered": [{"adapter_id": item.adapter_id, "version": item.version,
+                                   "formats": list(item.formats), "capabilities": sorted(item.capabilities),
+                                   "description": item.description} for item in registry.descriptors()],
+                   "available_entry_points": sorted(set(registry.adapter_ids) -
+                                                     {item.adapter_id for item in registry.descriptors()})})
+            return 0
+        if args.command == "probe":
+            registry = default_registry()
+            options = {}
+            adapter_id = args.adapter
+            if args.project:
+                project = Project.load(args.project)
+                configured = project.config["general"]["adapter"]
+                if adapter_id and adapter_id != configured:
+                    raise WorkflowError("--adapter conflicts with the project's configured adapter")
+                adapter_id = configured
+                options = project.config["game_specific"]["adapter_options"]
+            if args.include_plugins and adapter_id:
+                raise WorkflowError("--include-plugins cannot be combined with --adapter or --project")
+            if args.include_plugins:
+                registry.load_all_plugins()
+            source = Path(args.file).read_text(encoding="utf-8")
+            if adapter_id:
+                registry.create(adapter_id, options)
+                result = registry.probe(source, adapter_id=adapter_id, options=options)
+            else:
+                result = registry.probe(source)
+            _dump(result)
+            return 0
         project = Project.load(args.project)
         if args.command == "inspect":
             _dump(inspect_project(project))
@@ -100,7 +145,7 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise WorkflowError(f"Unsupported command: {args.command}")
         return 0
     except Exception as exc:
-        print(f"localize: error: {exc}", file=sys.stderr)
+        print(f"localize: error [LOCALIZE_ERROR]: {exc}\nNext: check the command help, project configuration, and reported adapter evidence.", file=sys.stderr)
         return 2
 
 

@@ -20,6 +20,7 @@ from ..models import (
     TextSlot,
     UnsupportedStructureError,
 )
+from .registry import FormatProbe, ProbeStatus
 
 
 @dataclass(frozen=True)
@@ -271,6 +272,11 @@ class BgiAdapter:
     or dialogue based only on its spelling.
     """
 
+    adapter_id = "bgi"
+    version = "1"
+    formats = ("BGI/C-like source subset",)
+    capabilities = frozenset({"extract", "writeback", "format_probe"})
+
     def __init__(
         self,
         *,
@@ -279,6 +285,59 @@ class BgiAdapter:
     ) -> None:
         self.schemas = dict(_DEFAULT_SCHEMAS if schemas is None else schemas)
         self.opaque_commands = dict(opaque_commands or {})
+
+    @classmethod
+    def from_options(cls, options: Mapping[str, object]) -> "BgiAdapter":
+        allowed = {"schemas", "opaque_commands"}
+        if set(options) - allowed:
+            raise ValueError(f"Unsupported BGI adapter options: {sorted(set(options) - allowed)}")
+        schemas: dict[str, CallSchema] | None = None
+        opaque: dict[str, OpaqueCallSchema] = {}
+        if "schemas" in options:
+            rows = options["schemas"]
+            if not isinstance(rows, dict):
+                raise ValueError("game_specific.adapter_options.schemas must be an object")
+            schemas = {}
+            for command, row in rows.items():
+                if (not isinstance(row, dict) or set(row) != {"arity", "text_pairs"}
+                        or type(row["arity"]) is not int or not isinstance(row["text_pairs"], list)):
+                    raise ValueError(f"Invalid schema configuration for {command}")
+                pairs = []
+                for pair in row["text_pairs"]:
+                    if not isinstance(pair, dict) or set(pair) != {"source_argument", "target_argument", "role"}:
+                        raise ValueError(f"Invalid text pair in schema {command}")
+                    if (type(pair["source_argument"]) is not int or type(pair["target_argument"]) is not int
+                            or not isinstance(pair["role"], str)):
+                        raise ValueError(f"Invalid text pair values in schema {command}")
+                    pairs.append(TextPair(pair["source_argument"], pair["target_argument"], pair["role"]))
+                schemas[command] = CallSchema(row["arity"], tuple(pairs))
+        if "opaque_commands" in options:
+            rows = options["opaque_commands"]
+            if not isinstance(rows, dict):
+                raise ValueError("game_specific.adapter_options.opaque_commands must be an object")
+            for command, row in rows.items():
+                if (not isinstance(row, dict) or set(row) != {"arity", "non_text_string_arguments"}
+                        or type(row["arity"]) is not int or not isinstance(row["non_text_string_arguments"], list)
+                        or any(type(i) is not int for i in row["non_text_string_arguments"])):
+                    raise ValueError(f"Invalid opaque command configuration for {command}")
+                opaque[command] = OpaqueCallSchema(row["arity"], frozenset(row["non_text_string_arguments"]))
+        return cls(schemas=schemas, opaque_commands=opaque or None)
+
+    def probe(self, source: str) -> FormatProbe:
+        """Inspect syntax only; never reads a file or evaluates BGI code."""
+        try:
+            calls = calls_from(lex(source))
+        except (TypeError, UnsupportedStructureError) as exc:
+            return FormatProbe(ProbeStatus.NEEDS_CONFIRMATION,
+                               (f"Could not establish supported BGI syntax: {exc}",))
+        recognized = sorted({call.name for call in calls if call.name in self.schemas})
+        if recognized:
+            return FormatProbe(ProbeStatus.SUPPORTED,
+                               ("Recognized explicit BGI call schema(s): " + ", ".join(recognized),))
+        if calls:
+            return FormatProbe(ProbeStatus.NEEDS_CONFIRMATION,
+                               ("Call syntax was found but no configured visible-text schema matched",))
+        return FormatProbe(ProbeStatus.UNSUPPORTED, ("No configured BGI text-call evidence found",))
 
     def extract(self, source: str, script: str, reference_source: str | None = None) -> ExtractionResult:
         tokens = lex(source)

@@ -5,7 +5,8 @@ This repository provides conservative localization engineering primitives, not u
 ## Navigation and scope
 
 - `src/localization_toolkit/models.py`: TextSlot and TextAdapter protocol.
-- `adapters/bgi.py` under that package: the only implemented text adapter. Never assume a game uses BGI. Unknown formats require read-only analysis first; unresolved structures block writeback.
+- `adapters/bgi.py` under that package: the only implemented real-game text adapter. The separate template is synthetic only. Never assume a game uses BGI. Unknown formats require read-only analysis first; unresolved structures block writeback.
+- `docs/adapter-development.md`: registry/plugin contract and synthetic template. Selected installed plugin code executes in-process; review it before use.
 - `translation/`: AIProvider protocol, local TranslationStore and quality gates. Mock translation is not real translation; no online provider is integrated.
 - `compilation/`: configured local compiler execution and finite MGSC v1 checks. Static validation is not in-game acceptance. Obtain a legally usable external compiler for real builds.
 - `cli/`, `deployment/`, `packages/`: project orchestration, guarded transactions, explicit-list packaging.

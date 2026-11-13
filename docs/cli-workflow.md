@@ -1,5 +1,7 @@
 # CLI project workflow
 
+`localize adapters [--load ID]` prints schema-versioned registered adapter metadata and discovered entry-point IDs. `--load ID` imports one selected plugin to show its actual declaration. `localize probe FILE [--adapter ID | --project PROJECT | --include-plugins]` reads UTF-8 text and prints schema-versioned syntax evidence. Probe results may be `supported`, `unsupported`, `needs_confirmation`, or `ambiguous`; none authorizes extraction or writeback. `--include-plugins` loads every installed adapter plugin and executes each hook in-process, so use it only when all those packages are trusted. See [adapter-development.md](adapter-development.md).
+
 The `localize` command is a thin project runner over the toolkit's existing BGI adapter, translation workflow, compiler build API, manifest checks, overlay packager, and deployment transaction API. It does not implement a second parser, translator, compiler, or installer.
 
 ## Support boundary
