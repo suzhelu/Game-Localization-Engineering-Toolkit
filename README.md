@@ -59,3 +59,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 统一命令行、项目配置及端到端工作流：[`docs/cli-workflow.md`](docs/cli-workflow.md)
 
 在仓库根目录运行测试：`python -m unittest discover -s tests -v`。部署事务只作用于调用方提供的现有文件白名单，不负责完整安装器功能，也不会猜测版本或部署目标。BGI 适配器只处理已配置 schema 覆盖的文本调用；未知含字符串调用或动态菜单会被报告并阻止写回。它不是完整 BGI 语言解析器或编译器。编译模块只运行调用方配置的本地工具，不捆绑编译器；MGSC v1 检查限于有项目代码证据的头部/表边界，负载保持不透明，静态构建不等于运行时验收。第七批 `localize` CLI 组合既有模块，默认使用 Mock Provider/Compiler，强制人工审核，部署默认关闭；PowerShell 教程见 [`docs/cli-workflow.md`](docs/cli-workflow.md)。仓库不包含游戏文件、真实游戏文本、译文、编译器或游戏程序集。
+
+## AI Quick Start
+
+Read [AGENTS.md](AGENTS.md), then the [PowerShell AI user guide](docs/quickstart-for-ai-users.md) and [capability audit](docs/ai-readiness-audit.md). Agents may manually load [the localization skill](skills/game-localization/SKILL.md). Start with localize --help and localize inspect on an explicit separate project. Only BGI and Mock translation are currently connected to the CLI; Mock translation is not real translation. Human review cannot be skipped. Static validation is not in-game acceptance. Unknown formats require read-only analysis first. Deployment remains disabled by default.
