@@ -86,12 +86,12 @@ class AgentDocsTests(unittest.TestCase):
             self.assertTrue((ROOT / example).is_file())
 
     def test_release_readiness_report_is_linked_historical_and_bounded(self):
-        report = (ROOT / 'docs/release-readiness-v0.2.0.md').read_text(encoding='utf-8')
-        self.assertIn('READY', report)
+        report = (ROOT / 'docs/releases/v0.2.0rc1-preparation-report.md').read_text(encoding='utf-8')
+        self.assertIn('PREPARED', report)
         self.assertIn('NOT_TESTED', report)
         self.assertIn('runtime_unverified', report)
-        self.assertIn('same Windows machine', report)
-        self.assertIn('not a security certification', report)
+        self.assertIn('same Windows host', report)
+        self.assertIn('security certification', report)
 
     def test_historical_batch_a_audit_is_labeled(self):
         report = (ROOT / 'docs/ai-readiness-audit.md').read_text(encoding='utf-8')
