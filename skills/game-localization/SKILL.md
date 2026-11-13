@@ -9,7 +9,7 @@ Use for toolkit-based extraction, translation preparation, validation and releas
 
 ## Prerequisites
 
-Confirm repository revision, clean/dirty state, user-authorized inputs and legal tool availability. Never assume BGI. Unknown formats require read-only analysis first. Prepare an isolated project; original game directories must remain read-only.
+Confirm repository revision, clean/dirty state, user-authorized inputs and legal tool availability. Before choosing an adapter, follow [unknown-game analysis](../../docs/game-analysis-workflow.md) and the [11-stage task contract](../../docs/ai-task-contract.md). Never assume BGI. Unknown formats require read-only analysis first. Prepare an isolated project; original game directories must remain read-only.
 
 ## Stages and outputs
 

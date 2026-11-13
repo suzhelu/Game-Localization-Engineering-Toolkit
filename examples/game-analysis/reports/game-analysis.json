@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "game": "Fictional Lantern Demo",
+  "platform": "SyntheticFixture",
+  "engine": {"name": "unknown", "evidence_level": "unknown"},
+  "evidence": [
+    {"claim": "The fixture contains a file named sample.dat", "level": "confirmed", "source": "synthetic inventory fixture"},
+    {"claim": "The file may contain text records", "level": "inferred", "source": "synthetic header marker only; no parser validation"}
+  ],
+  "resource_candidates": [
+    {"path": "data/sample.fixture", "kind": "unknown container", "evidence_level": "confirmed"}
+  ],
+  "encoding": {"value": "unknown", "evidence_level": "unknown"},
+  "localization_support": {"value": "unknown", "evidence_level": "unknown"},
+  "font_support": {"value": "unknown", "evidence_level": "unknown"},
+  "compiler_requirements": {"value": "unknown", "evidence_level": "unknown"},
+  "reusable_components": ["manifest/hash primitives for synthetic inventories"],
+  "risks": ["Do not infer format support from the .dat suffix."],
+  "unknowns": ["Container structure and runtime text rendering are not confirmed."],
+  "next_actions": ["Inspect a copied synthetic sample as bytes; do not execute it.", "Keep the original fixture unchanged."],
+  "stages": {
+    "stage_0": "passed", "stage_1": "in_progress", "stage_2": "not_started",
+    "stage_3": "not_started", "stage_4": "not_started", "stage_5": "not_started",
+    "stage_6": "not_started", "stage_7": "not_started", "stage_8": "not_started",
+    "stage_9": "runtime_unverified", "stage_10": "not_started"
+  },
+  "runtime_evidence": []
+}

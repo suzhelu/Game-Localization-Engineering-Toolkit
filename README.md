@@ -57,6 +57,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 确定性覆盖包格式、构建和审计：[`docs/overlay-packages.md`](docs/overlay-packages.md)
 - AI 翻译工作流、术语表和质量审核：[`docs/translation-workflow.md`](docs/translation-workflow.md)
 - Agent 离线翻译交换格式、CLI、锁与恢复限制：[`docs/agent-translation-exchange.md`](docs/agent-translation-exchange.md)
+- 未知游戏分析规范与 11 阶段 Agent 任务协议：[`docs/game-analysis-workflow.md`](docs/game-analysis-workflow.md)、[`docs/ai-task-contract.md`](docs/ai-task-contract.md)
 - 编译适配器、MGSC v1 验证范围与构建证据：[`docs/compilation-adapters.md`](docs/compilation-adapters.md)
 - 统一命令行、项目配置及端到端工作流：[`docs/cli-workflow.md`](docs/cli-workflow.md)
 
