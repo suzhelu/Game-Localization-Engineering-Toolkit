@@ -10,6 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ['AGENTS.md', 'README.md', 'docs/quickstart-for-ai-users.md',
         'docs/ai-readiness-audit.md', 'docs/agent-entry-validation.md',
         'docs/compatibility.md', 'docs/faq.md', 'examples/agent-workflow/README.md',
+        'docs/release-readiness-v0.2.0.md', 'CHANGELOG.md',
         'skills/game-localization/SKILL.md',
         'skills/game-localization/references/analysis.md',
         'skills/game-localization/references/release.md']
@@ -83,6 +84,19 @@ class AgentDocsTests(unittest.TestCase):
         self.assertEqual(len(set(examples)), 10)
         for example in examples:
             self.assertTrue((ROOT / example).is_file())
+
+    def test_release_readiness_report_is_linked_historical_and_bounded(self):
+        report = (ROOT / 'docs/release-readiness-v0.2.0.md').read_text(encoding='utf-8')
+        self.assertIn('READY', report)
+        self.assertIn('NOT_TESTED', report)
+        self.assertIn('runtime_unverified', report)
+        self.assertIn('same Windows machine', report)
+        self.assertIn('not a security certification', report)
+
+    def test_historical_batch_a_audit_is_labeled(self):
+        report = (ROOT / 'docs/ai-readiness-audit.md').read_text(encoding='utf-8')
+        self.assertIn('historical snapshot', report)
+        self.assertIn('not a description of the current repository', report)
 
     def test_no_runtime_source_changes_are_required_by_entry_docs(self):
         text = (ROOT / 'docs/ai-readiness-audit.md').read_text(encoding='utf-8')

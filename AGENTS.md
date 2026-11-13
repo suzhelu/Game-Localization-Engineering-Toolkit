@@ -31,6 +31,6 @@ Translation exchange uses UTF-8 JSONL schema version 1. Exports use exclusive cr
 
 ## Testing and public safety
 
-Run `python -m unittest discover -s tests -v` with the repository environment and all seven examples listed in [AI quick start](docs/quickstart-for-ai-users.md). Use synthetic inputs and temporary targets only. Do not upload game resources, real translations, secrets, or unauthorized third-party tools. Do not bypass DRM, encryption protections, or anti-cheat mechanisms. Publishing requires separate authorization. Keep runtime acceptance distinct from static checks.
+Run `python -m unittest discover -s tests -v` with the repository environment and all ten examples listed in [AI quick start](docs/quickstart-for-ai-users.md). Use synthetic inputs and temporary targets only. Do not upload game resources, real translations, secrets, or unauthorized third-party tools. Do not bypass DRM, encryption protections, or anti-cheat mechanisms. Publishing requires separate authorization. Keep runtime acceptance distinct from static checks.
 
 The optional [game-localization skill](skills/game-localization/SKILL.md) is a manual reading entry for other agents. Automatic discovery by every Agent host is not verified.

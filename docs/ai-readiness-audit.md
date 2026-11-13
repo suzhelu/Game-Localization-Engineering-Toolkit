@@ -1,4 +1,6 @@
-# AI readiness audit — Batch A
+# AI readiness audit — Batch A (historical snapshot)
+
+> **Historical baseline:** this document records the Batch A audit at commit `a898251a0a6e4498df4850267bbef554ab8f177e` and the v0.1.0 code state. It is not a description of the current repository. In particular, later batches added the adapter registry, translation exchange and OS-locking behavior, game-analysis reports, and end-to-end workflow. Use [compatibility.md](compatibility.md), [adapter-development.md](adapter-development.md), [agent-translation-exchange.md](agent-translation-exchange.md), and the current tests for present behavior.
 
 Audit baseline: `a898251a0a6e4498df4850267bbef554ab8f177e`, main and fetched origin/main, peeled v0.1.0 tag. Working tree was clean before this batch. Windows PowerShell, Python 3.10.11. Baseline: 179 unittest tests passed. This is a source/API and synthetic-test audit, not a security certification or a game compatibility test.
 

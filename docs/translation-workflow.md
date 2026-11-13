@@ -51,7 +51,7 @@ The example at `examples/translation/mock_batch.py` uses synthetic text and a te
 
 Valid provider output is saved as `pending_review`, never as approved. Structurally unsafe output is `needs_review`; failed calls are `provider_error`; explicitly accepted/rejected results are `approved`/`rejected`. Re-running the same tasks skips current pending-review and approved records. Failed or structurally invalid records can be retried. When source text, reference, structural location, role/context, prompt, glossary, or rule version changes, an older matching-location record is marked `stale` and cannot be reused for writeback.
 
-Batch writes happen after each provider response, so completed batches survive process interruption. The state file currently assumes one writer at a time; concurrent workflow processes sharing one store are unsupported.
+Batch writes happen after each provider response, so completed batches survive process interruption. All public store write methods use a shared OS lock and optimistic fingerprint check; after acquiring the lock they reload current state before merging. Concurrent cooperating local processes therefore cannot silently overwrite each other's updates. Locks are advisory and target local filesystems; external writers that bypass the store, network-share behavior, and multi-user synchronization are unsupported. See [Agent translation exchange](agent-translation-exchange.md) for limits.
 
 ## Structural checks and human review
 
@@ -76,7 +76,7 @@ Semantic accuracy, omissions not exposed by structural markers, character voice,
 - No AI service provider, network call, translation-quality model, automatic semantic approval, or real translation is implemented.
 - Marker recognition is conservative and configurable support may be needed for project-specific placeholder syntaxes.
 - The glossary checker enforces only explicitly required source/target entries; it cannot infer term sense from context.
-- A local JSON store has no locking, encryption, multi-user merge, or remote synchronization.
+- A local JSON store is not encrypted and has no multi-user merge or remote synchronization. Its advisory lock protects cooperating local toolkit writers, not arbitrary external processes; network filesystems are not certified.
 - Safe script writeback is delegated to the existing format adapter. This module is not a script compiler, deployment tool, or installer.
 
 Run the synthetic example with `python examples/translation/mock_batch.py`.
