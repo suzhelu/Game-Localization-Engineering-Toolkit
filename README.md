@@ -65,6 +65,8 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 
 ## AI Quick Start
 
-Read [AGENTS.md](AGENTS.md), then the [PowerShell AI user guide](docs/quickstart-for-ai-users.md) and [capability audit](docs/ai-readiness-audit.md). Agents may manually load [the localization skill](skills/game-localization/SKILL.md). Start with localize --help and localize inspect on an explicit separate project. Only BGI and Mock translation are currently connected to the CLI; Mock translation is not real translation. Human review cannot be skipped. Static validation is not in-game acceptance. Unknown formats require read-only analysis first. Deployment remains disabled by default.
+Read [AGENTS.md](AGENTS.md), then the [PowerShell AI user guide](docs/quickstart-for-ai-users.md) and [capability audit](docs/ai-readiness-audit.md). Agents may manually load [the localization skill](skills/game-localization/SKILL.md). Run the [synthetic end-to-end workflow](examples/agent-workflow/README.md) before using a separate authorized project. Only BGI and Mock translation are currently connected to the CLI; Mock translation is not real translation. Human review cannot be skipped. Static validation is not in-game acceptance. Unknown formats require read-only analysis first. Deployment remains disabled by default.
+
+For supported scope and common questions, see [compatibility](docs/compatibility.md) and the [FAQ](docs/faq.md).
 
 New text adapters follow the [adapter development and registry guide](docs/adapter-development.md). Use `localize adapters` to list known adapter IDs and `localize probe` for read-only syntax evidence; probing never authorizes writeback.

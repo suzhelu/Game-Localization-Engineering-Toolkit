@@ -4,7 +4,7 @@
   "platform": "SyntheticFixture",
   "engine": {"name": "unknown", "evidence_level": "unknown"},
   "evidence": [
-    {"claim": "The fixture contains a file named sample.dat", "level": "confirmed", "source": "synthetic inventory fixture"},
+    {"claim": "The fixture contains a file named sample.fixture", "level": "confirmed", "source": "synthetic inventory fixture"},
     {"claim": "The file may contain text records", "level": "inferred", "source": "synthetic header marker only; no parser validation"}
   ],
   "resource_candidates": [

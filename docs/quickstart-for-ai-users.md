@@ -1,56 +1,65 @@
-# AI user quick start (Windows PowerShell)
+# AI quick start (Windows PowerShell)
 
-This toolkit is not one-click localization for arbitrary games. Only the BGI text adapter and local Mock translation provider are currently wired into the CLI. Mock translation is not real translation. Human review cannot be skipped. Static validation is not in-game acceptance.
+This toolkit is not one-click localization for arbitrary games. The CLI currently connects the conservative BGI text adapter, a local Mock translation provider, and a Mock Compiler by default. No online AI provider or real game compiler is bundled. Human review cannot be skipped. Static validation is not in-game acceptance.
 
-## Install in a separate workspace
+## Install from a clean Windows environment
 
-Install Python 3.10+ from [python.org](https://www.python.org/downloads/windows/) if absent. Open PowerShell in a clone of this repository, outside any game installation. Check Python with `python --version`; a Microsoft Store alias is not proof of a usable interpreter. The `py` launcher is optional. If python is unavailable, select the installed executable explicitly:
+Install Git and Python 3.10+ if needed. The `py` launcher is optional. In PowerShell, clone the repository and enter it:
 
 ```powershell
-$pythonExe = Read-Host 'Full path to an installed Python 3.10+ python.exe'
-& $pythonExe -c "import sys; assert sys.version_info >= (3, 10)"
-if ($LASTEXITCODE -ne 0) { throw 'A working Python 3.10+ is required' }
+git clone https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git
+Set-Location Game-Localization-Engineering-Toolkit
+```
+
+Check whether a usable Python is on PATH. If `python` is absent or opens a Store page, set `$pythonExe` to the full path of an installed Python 3.10+ executable (for example, from the official python.org installer):
+
+```powershell
+$pythonCommand = Get-Command python -ErrorAction SilentlyContinue
+if ($pythonCommand) { $pythonExe = $pythonCommand.Source } else { $pythonExe = Read-Host 'Enter the full path to Python 3.10+ python.exe' }
+& $pythonExe --version
+if ($LASTEXITCODE -ne 0) { throw 'Python could not be started' }
+& $pythonExe -c "import sys; assert sys.version_info >= (3, 10), sys.version"
+if ($LASTEXITCODE -ne 0) { throw 'Python 3.10 or newer is required' }
 & $pythonExe -m venv .venv
-if ($LASTEXITCODE -ne 0) { throw 'venv creation failed' }
+if ($LASTEXITCODE -ne 0) { throw 'Virtual environment creation failed' }
+& .\.venv\Scripts\python.exe -m pip install --upgrade pip
+if ($LASTEXITCODE -ne 0) { throw 'pip setup failed' }
 & .\.venv\Scripts\python.exe -m pip install -e .
-if ($LASTEXITCODE -ne 0) { throw 'Installation failed' }
+if ($LASTEXITCODE -ne 0) { throw 'Toolkit installation failed' }
 & .\.venv\Scripts\localize.exe --help
+if ($LASTEXITCODE -ne 0) { throw 'CLI executable is unavailable' }
+```
+
+This uses the virtual environment's executables directly and does not require changing PowerShell execution policy or activating the environment. Run tests from the repository root:
+
+```powershell
 & .\.venv\Scripts\python.exe -m unittest discover -s tests -v
+if ($LASTEXITCODE -ne 0) { throw 'Tests failed' }
 ```
 
-Explicit virtual-environment executable paths avoid activation-policy changes. For automatic interpreter probing and the optional launcher fallback, use the existing [installation guide](python-toolkit-quickstart.md). Check each native command's exit code; PowerShell does not automatically stop on nonzero exits.
+## Start Codex or another Agent
 
-## Start an Agent with bounded access
+Open the cloned repository in the Codex desktop application and start a chat there. Ask the Agent to read `AGENTS.md` and `skills/game-localization/SKILL.md`. The Skill is a manually loadable entry for other Agent products; automatic discovery across hosts has not been tested. Give the Agent an explicit, read-only analysis scope and a separate workspace path for any legally held test-copy files. Never point it at a Steam/original installation for write operations.
 
-Open the repository folder in your installed Codex application and start a chat there. Ask it to read [AGENTS.md](../AGENTS.md) before acting. Codex documents repository instructions in its [official AGENTS.md guide](https://learn.chatgpt.com/docs/agent-configuration/agents-md). Installing/authenticating Codex is separate from installing this Python package. Other agents can manually load [the skill](../skills/game-localization/SKILL.md); automatic discovery across hosts has not been tested.
+For other Agent products, provide these repository-relative instruction paths directly. Do not place personal absolute paths, game files, or secrets in the repository.
 
-Give the Agent the private path of a legally held **test copy**, requested source/target languages, and an explicit read-only scope. Do not put your private path or game contents into this repository. Original game directories must remain read-only. An example request is: "Read AGENTS.md. Analyze only the explicitly named scripts in my test copy; do not modify them. Report format evidence, unsupported structures, hashes and approval requirements in a separate project directory. Do not assume BGI or translate yet."
+## Run the complete synthetic workflow
 
-Unknown formats require read-only analysis first. `localize inspect` is not engine detection and does not generate a full game analysis report automatically.
-
-## First synthetic project and analysis report
+The example exercises actual existing CLI commands with a generated fixture, a prewritten synthetic translation, and Mock compilation. It deliberately simulates the review action only for test plumbing; it is not a real reviewer approval.
 
 ```powershell
-& .\.venv\Scripts\localize.exe init ./work/agent-demo --name AgentDemo
+$demo = Join-Path $env:TEMP ("localize-agent-workflow-" + [guid]::NewGuid().ToString('N'))
+& .\.venv\Scripts\python.exe examples/agent-workflow/end_to_end.py --workspace $demo
+if ($LASTEXITCODE -ne 0) { throw 'Synthetic workflow failed' }
+Get-Content (Join-Path $demo 'synthetic-project\reports\game-analysis.md')
+Get-Content (Join-Path $demo 'synthetic-project\reports\final-report.json')
 ```
 
-Use the generated `localize.json` as the schema reference. Keep deployment disabled and compiler kind mock. Add only an authorized source copied into the separate project's input folder, never the game directory itself. For the synthetic tutorial use `OutputLineAll("Synthetic source", "Synthetic reference", 0);` in `input/demo.txt`, set inputs.scripts to `[{"id":"demo","source":"input/demo.txt","output":"scripts/demo.mg"}]`, and package.files to `[{"build_path":"scripts/demo.mg","archive_path":"scripts/demo.mg"}]`. Preserve all other generated keys. Save JSON/source as UTF-8 (without BOM for JSON); do not rely on Windows PowerShell's default text encoding.
+The report and overlay package remain under the new temporary demo directory. It checks that compilation is blocked while translations are pending review, then demonstrates the test-only review gate, Mock Compiler, static checks, and package manifest. It leaves Stage 9 as `runtime_unverified` and deployment disabled. Review the detailed [synthetic workflow notes](../examples/agent-workflow/README.md).
 
-```powershell
-$report = & .\.venv\Scripts\localize.exe inspect --project ./work/agent-demo
-if ($LASTEXITCODE -ne 0) { throw 'Inspect failed' }
-$report | Out-File ./work/agent-demo/inspect-report.json -Encoding utf8
-& .\.venv\Scripts\localize.exe extract --project ./work/agent-demo
-& .\.venv\Scripts\localize.exe status --project ./work/agent-demo
-```
+To list available adapters and inspect one input without writing it, use `localize adapters` and `localize probe PATH --adapter bgi`. A probe is syntax evidence for that input only; it is not engine detection or permission to write back.
 
-Out-File may add a UTF-8 BOM on Windows PowerShell 5.1; this report is evidence, not CLI configuration input. Ask the Agent to combine it with extraction issues into an analysis report using [the report checklist](../skills/game-localization/references/analysis.md). Record actual counts, hashes, unresolved syntax and next decisions; never invent reachability or successful runtime tests. Stop before real translation until format and scope are confirmed.
-
-## Continue only within supported scope
-
-Follow [the command guide](cli-workflow.md) for translate, review, compile, verify and package. Mock produces test output; a human must explicitly review real translation before safe writeback. Never fabricate reviewer identity. A real compiler must be legally held, configured and version-checked by its owner. MGSC v1 validation checks only the envelope, not its payload or game behavior. Packaging uses explicit files and does not install them. Deployment and recovery need separate authorization and confirmations; leave them disabled in this quick start.
-
-Run all seven existing synthetic examples with the venv interpreter:
+Run the established synthetic examples and the new end-to-end workflow with the virtual-environment interpreter:
 
 ```powershell
 & .\.venv\Scripts\python.exe examples/verify_sample.py
@@ -60,6 +69,28 @@ Run all seven existing synthetic examples with the venv interpreter:
 & .\.venv\Scripts\python.exe examples/translation/mock_batch.py
 & .\.venv\Scripts\python.exe examples/compilation/mock_build.py
 & .\.venv\Scripts\python.exe examples/cli/end_to_end.py
+& .\.venv\Scripts\python.exe examples/agent-translation/exchange_demo.py
+& .\.venv\Scripts\python.exe examples/game-analysis/analysis_demo.py
+& .\.venv\Scripts\python.exe examples/agent-workflow/end_to_end.py
 ```
 
-The BGI example writes an ignored synthetic output beside itself; most others use temporary directories. The end-to-end example supplies fixture approvals only. None establishes real game acceptance. Preserve game-resource, secret, third-party-license and DRM boundaries from AGENTS.md.
+The BGI example writes an ignored synthetic output beside itself; others use temporary directories by default. The new workflow uses a prewritten synthetic translation and a test-only approval; neither is a real AI translation nor a human approval. None of these examples establishes real game acceptance.
+
+## Real project boundaries
+
+Before touching a new title, follow the [game analysis workflow](game-analysis-workflow.md) and [11-stage task contract](ai-task-contract.md). Do not infer engine support from an extension. Only the registered BGI adapter is implemented for real script syntax; unsupported structures must remain untouched. Mock translation is not real translation; imported text stays pending human review. A real compiler must be legally held and explicitly configured by its owner. MGSC v1 checking is limited to verified envelope/table boundaries. Packaging uses an explicit file list and does not install files. Deployment is a separate, explicitly authorized operation with target checks and recovery safeguards. Stage 9 requires actual in-game observation; no synthetic example proves compatibility.
+
+For command details see [CLI workflow](cli-workflow.md), [compatibility](compatibility.md), and [FAQ](faq.md).
+
+## Basic CLI commands
+
+From a configured isolated project, CLI examples include:
+
+```powershell
+localize init ./work/demo --name SyntheticDemo
+localize inspect --project ./work/demo
+localize extract --project ./work/demo
+localize status --project ./work/demo
+```
+
+`init` creates a project skeleton; the remaining commands require a valid `localize.json` with explicit inputs where applicable. These examples do not imply that the tool detects arbitrary game engines.

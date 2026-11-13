@@ -7,6 +7,8 @@ description: Guide evidence-based localization planning and guarded toolkit work
 
 Use for toolkit-based extraction, translation preparation, validation and release planning. This skill does not identify arbitrary engines or supply online AI, game resources or compilers. Read [repository instructions](../../AGENTS.md) first. Other Agent hosts can manually load this file; automatic discovery is not verified.
 
+For first-time operators, link the [Windows PowerShell quick start](../../docs/quickstart-for-ai-users.md), [compatibility boundaries](../../docs/compatibility.md), and [FAQ](../../docs/faq.md). The [end-to-end synthetic workflow](../../examples/agent-workflow/README.md) is a plumbing demonstration only and must not be described as a real translation, human approval, real compiler result, or runtime test.
+
 ## Prerequisites
 
 Confirm repository revision, clean/dirty state, user-authorized inputs and legal tool availability. Before choosing an adapter, follow [unknown-game analysis](../../docs/game-analysis-workflow.md) and the [11-stage task contract](../../docs/ai-task-contract.md). Never assume BGI. Unknown formats require read-only analysis first. Prepare an isolated project; original game directories must remain read-only.

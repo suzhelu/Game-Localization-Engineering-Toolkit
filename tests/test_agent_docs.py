@@ -9,6 +9,7 @@ from localization_toolkit.cli import parser
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ['AGENTS.md', 'README.md', 'docs/quickstart-for-ai-users.md',
         'docs/ai-readiness-audit.md', 'docs/agent-entry-validation.md',
+        'docs/compatibility.md', 'docs/faq.md', 'examples/agent-workflow/README.md',
         'skills/game-localization/SKILL.md',
         'skills/game-localization/references/analysis.md',
         'skills/game-localization/references/release.md']
@@ -26,7 +27,7 @@ class AgentDocsTests(unittest.TestCase):
                 self.assertTrue((ROOT / name).is_file())
 
     def test_skill_frontmatter_is_supported_yaml_scalar_mapping(self):
-        text = (ROOT / DOCS[5]).read_text(encoding='utf-8')
+        text = (ROOT / 'skills/game-localization/SKILL.md').read_text(encoding='utf-8')
         self.assertTrue(text.startswith('---\n'))
         header = text.split('---', 2)[1]
         values = {}
@@ -78,8 +79,8 @@ class AgentDocsTests(unittest.TestCase):
 
     def test_examples_are_real_and_all_seven_listed(self):
         text = (ROOT / 'docs/quickstart-for-ai-users.md').read_text(encoding='utf-8')
-        examples = re.findall(r'examples/[A-Za-z_/]+\.py', text)
-        self.assertEqual(len(set(examples)), 7)
+        examples = re.findall(r'examples/[A-Za-z_/-]+\.py', text)
+        self.assertEqual(len(set(examples)), 10)
         for example in examples:
             self.assertTrue((ROOT / example).is_file())
 
