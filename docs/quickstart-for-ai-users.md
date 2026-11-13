@@ -4,10 +4,12 @@ This toolkit is not one-click localization for arbitrary games. The CLI currentl
 
 ## Install from a clean Windows environment
 
+This preview guide pins the release tag; replace `v0.2.0rc1` with the intended tag when using a different release.
+
 Install Git and Python 3.10+ if needed. The `py` launcher is optional. In PowerShell, clone the repository and enter it:
 
 ```powershell
-git clone https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git
+git clone --branch v0.2.0rc1 --depth 1 https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git
 Set-Location Game-Localization-Engineering-Toolkit
 ```
 

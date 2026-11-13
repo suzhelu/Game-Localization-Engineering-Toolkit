@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ['AGENTS.md', 'README.md', 'docs/quickstart-for-ai-users.md',
         'docs/ai-readiness-audit.md', 'docs/agent-entry-validation.md',
         'docs/compatibility.md', 'docs/faq.md', 'examples/agent-workflow/README.md',
-        'docs/release-readiness-v0.2.0.md', 'CHANGELOG.md',
+        'docs/release-readiness-v0.2.0.md', 'docs/releases/v0.2.0rc1.md', 'CHANGELOG.md',
         'skills/game-localization/SKILL.md',
         'skills/game-localization/references/analysis.md',
         'skills/game-localization/references/release.md']
@@ -68,6 +68,12 @@ class AgentDocsTests(unittest.TestCase):
                        'Static validation is not in-game acceptance', 'DRM', 'anti-cheat',
                        'unknown hashes', 'actual validation evidence', 'unauthorized third-party'):
             self.assertIn(phrase, text)
+
+    def test_preview_install_examples_pin_the_release_tag(self):
+        clone = 'git clone --branch v0.2.0rc1 --depth 1 https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git'
+        for name in ('docs/quickstart-for-ai-users.md', 'docs/releases/v0.2.0rc1.md'):
+            with self.subTest(document=name):
+                self.assertIn(clone, (ROOT / name).read_text(encoding='utf-8'))
 
     def test_quickstart_preserves_limitations(self):
         text = (ROOT / 'docs/quickstart-for-ai-users.md').read_text(encoding='utf-8')

@@ -162,11 +162,26 @@ class AgentWorkflowTests(unittest.TestCase):
         self.assertIn(result["status"], {"disabled", "plan_only", "precheck_failed"})
         self.assertFalse((self.project / "target").exists())
 
-    def test_demo_rejects_workspace_outside_system_temp(self):
-        outside = REPO / "should-not-be-created-by-demo"
-        with self.assertRaisesRegex(ValueError, "temporary directory"):
-            run(outside)
-        self.assertFalse(outside.exists())
+    def test_demo_rejects_workspace_outside_controlled_temp_root(self):
+        with tempfile.TemporaryDirectory(prefix="localize-controlled-temp-") as temporary_root:
+            temp_root = Path(temporary_root).resolve()
+            outside = temp_root.parent / f"{temp_root.name}-outside"
+            self.assertFalse(outside.exists())
+            with patch.object(_DEMO.tempfile, "gettempdir", return_value=str(temp_root)):
+                with self.assertRaisesRegex(ValueError, "temporary directory"):
+                    run(outside)
+            self.assertFalse(outside.exists())
+
+    def test_demo_accepts_workspace_nested_under_controlled_temp_root(self):
+        with tempfile.TemporaryDirectory(prefix="localize-controlled-temp-") as temporary_root:
+            temp_root = Path(temporary_root).resolve()
+            nested = temp_root / "nested" / "demo"
+            with patch.object(_DEMO.tempfile, "gettempdir", return_value=str(temp_root)):
+                report = run(nested)
+            self.assertEqual(report["status"], "passed")
+            self.assertEqual(report["stage_9"], "runtime_unverified")
+            self.assertFalse(report["deployment_enabled"])
+            self.assertTrue((nested / "synthetic-project" / "reports" / "final-report.json").is_file())
 
     def test_every_registered_cli_command_has_working_help(self):
         commands = parser()._subparsers._group_actions[0].choices
