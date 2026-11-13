@@ -23,6 +23,8 @@ from ..translation import (
     Glossary, MockProvider, PromptTemplate, ProviderResult, TranslationStore,
     approve_translation, build_tasks, reject_translation, run_batches,
 )
+from ..translation.exchange import export_jsonl, import_jsonl
+from ..translation.models import TranslationStatus
 from .config import Project, ProjectConfigError
 from .state import now, operation, read_state, require_fresh, write_state
 
@@ -150,6 +152,32 @@ def translate(project: Project) -> dict[str, Any]:
                              target_language=general["target_language"], rule_version=general["rule_version"],
                              batch_size=general["batch_size"], special_rules=_rules(project))
         _stage(state, "translate", fingerprint, **result)
+        op["summary"] = result
+        return result
+
+
+def translate_export(project: Project, output: str, *, limit: int = 0, offset: int = 0) -> dict[str, Any]:
+    with operation(project, "translate-export") as (state, op):
+        fingerprint = project.fingerprint()
+        tasks = _tasks(project, _fresh_extractions(project, state, fingerprint))
+        store = _store(project)
+        pending = [task for task in tasks
+                   if (store.get(task.task_id) is None or store.get(task.task_id).status not in
+                       {TranslationStatus.PENDING_REVIEW, TranslationStatus.APPROVED})]
+        count = export_jsonl(pending, project.path(output), batch_size=limit, offset=offset)
+        result = {"schema_version": 1, "exported": count, "total_pending": len(pending),
+                  "offset": offset, "path": output}
+        op["summary"] = result
+        return result
+
+
+def translate_import(project: Project, input_path: str) -> dict[str, Any]:
+    with operation(project, "translate-import") as (state, op):
+        fingerprint = project.fingerprint()
+        tasks = _tasks(project, _fresh_extractions(project, state, fingerprint))
+        result = import_jsonl(project.path(input_path), tasks,
+                              glossary=_glossary(project), store=_store(project))
+        _stage(state, "translate", fingerprint, imported=result["imported"], pending_review=result["pending_review"])
         op["summary"] = result
         return result
 

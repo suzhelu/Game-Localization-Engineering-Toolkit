@@ -16,6 +16,7 @@ Confirm repository revision, clean/dirty state, user-authorized inputs and legal
 1. Identify supported syntax and inputs. Produce an analysis report with hashes, evidence, unresolved structures and adapter decision. Read [analysis reference](references/analysis.md).
 2. Configure explicit inputs and extract slots. Preserve slot IDs, controls and extraction diagnostics. Read the existing BGI and CLI documents linked in the reference only when this stage applies.
 3. Run Mock batches only to exercise plumbing. Mock translation is not real translation. Preserve task fingerprints and pending records; human review cannot be skipped. Do not impersonate a reviewer.
+   For offline Agent exchange, use `localize translate-export --project PROJECT exchange/tasks.jsonl`, return schema-version-1 JSONL, then `localize translate-import --project PROJECT exchange/results.jsonl`. Imports remain `pending_review`; never approve on behalf of the user. Read [Agent translation exchange](../../docs/agent-translation-exchange.md) for fields, fingerprint checks, batch validation and lock boundaries.
 4. After explicit review, build and verify in isolation using the existing compiler interface. Static validation is not in-game acceptance. Record exit codes, evidence levels, artifact hashes and limitations.
 5. Package explicit verified files. Deployment and recovery are separate authorized operations. Read [release reference](references/release.md) only when requested.
 

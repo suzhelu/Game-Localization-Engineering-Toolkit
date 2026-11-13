@@ -4,6 +4,8 @@ from __future__ import annotations
 import json
 import os
 import tempfile
+import time
+from contextlib import contextmanager
 from dataclasses import asdict
 from pathlib import Path
 from typing import Any, Iterable
@@ -29,6 +31,54 @@ class TranslationStore:
 
     def __init__(self, path: str | os.PathLike[str]):
         self.path = Path(path)
+        self.lock_timeout_seconds = 5.0
+
+    @contextmanager
+    def _exclusive(self):
+        """OS-managed exclusive lock; the OS releases it if a writer exits."""
+        self.path.parent.mkdir(parents=True, exist_ok=True)
+        lock_path = self.path.with_name(self.path.name + ".lock")
+        stream = open(lock_path, "a+b")
+        try:
+            if os.name == "nt":
+                import msvcrt
+                # Never read the byte-range-locked file: Windows may deny that
+                # read while another process holds the lock. Appending a byte
+                # only when metadata says it is empty makes offset zero lockable.
+                if lock_path.stat().st_size == 0:
+                    stream.write(b"0"); stream.flush()
+                deadline = time.monotonic() + self.lock_timeout_seconds
+                while True:
+                    try:
+                        stream.seek(0); msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1); break
+                    except OSError:
+                        if time.monotonic() >= deadline:
+                            raise TranslationStoreError("Translation store is locked by another writer")
+                        time.sleep(0.05)
+                try:
+                    yield
+                finally:
+                    stream.seek(0); msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                import fcntl
+                deadline = time.monotonic() + self.lock_timeout_seconds
+                while True:
+                    try:
+                        fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB); break
+                    except BlockingIOError:
+                        if time.monotonic() >= deadline:
+                            raise TranslationStoreError("Translation store is locked by another writer")
+                        time.sleep(0.05)
+                try:
+                    yield
+                finally:
+                    fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+        finally:
+            stream.close()
+
+    def snapshot_fingerprint(self) -> str:
+        import hashlib
+        return hashlib.sha256(self.path.read_bytes() if self.path.exists() else b"{}").hexdigest().upper()
 
     def _read(self) -> dict[str, TranslationRecord]:
         if not self.path.exists():
@@ -55,16 +105,43 @@ class TranslationStore:
     def get(self, task_id: str) -> TranslationRecord | None:
         return self._read().get(task_id)
 
-    def upsert(self, record: TranslationRecord) -> None:
-        records = self._read()
-        records[record.task_id] = record
-        self._write(records.values())
-
-    def save_many(self, records_to_save: Iterable[TranslationRecord]) -> None:
-        records = self._read()
-        for record in records_to_save:
+    def upsert(self, record: TranslationRecord, *, expected_current: TranslationRecord | None = None) -> None:
+        with self._exclusive():
+            records = self._read()
+            current = records.get(record.task_id)
+            if current != expected_current:
+                raise TranslationStoreError("Translation record changed concurrently; reload before updating")
             records[record.task_id] = record
-        self._write(records.values())
+            self._write(records.values())
+
+    def save_many(self, records_to_save: Iterable[TranslationRecord], *, expected_fingerprint: str | None = None,
+                  allow_replace: bool = False) -> None:
+        if allow_replace and expected_fingerprint is None:
+            raise TranslationStoreError("Replacing existing records requires an expected store fingerprint")
+        rows = tuple(records_to_save)
+        with self._exclusive():
+            if expected_fingerprint is not None and self.snapshot_fingerprint() != expected_fingerprint:
+                raise TranslationStoreError("Translation store changed during validation; retry from a fresh snapshot")
+            records = self._read()
+            if not allow_replace:
+                for row in rows:
+                    current = records.get(row.task_id)
+                    if current is not None:
+                        same_result = (
+                            current.status == row.status and current.target_text == row.target_text
+                            and current.source_sha256 == row.source_sha256
+                            and current.location_fingerprint == row.location_fingerprint
+                            and current.context_sha256 == row.context_sha256
+                            and current.rules_fingerprint == row.rules_fingerprint
+                            and current.prompt_fingerprint == row.prompt_fingerprint
+                        )
+                        if not same_result:
+                            raise TranslationStoreError("Conflicting translation record; refusing to overwrite existing state")
+            for record in rows:
+                current = records.get(record.task_id)
+                if current is None or allow_replace:
+                    records[record.task_id] = record
+            self._write(records.values())
 
     def _write(self, records: Iterable[TranslationRecord]) -> None:
         self.path.parent.mkdir(parents=True, exist_ok=True)

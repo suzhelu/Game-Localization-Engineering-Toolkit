@@ -5,6 +5,7 @@ from .models import ProviderResult, TranslationIssue, TranslationRecord, Transla
 from .prompt import PromptTemplate
 from .provider import AIProvider, MockProvider
 from .store import TranslationStore, TranslationStoreError
+from .exchange import ExchangeError, export_jsonl, import_jsonl
 from .workflow import (
     TranslationWorkflowError,
     approve_translation,
@@ -18,6 +19,6 @@ __all__ = [
     "AIProvider", "Glossary", "GlossaryEntry", "GlossaryError", "MockProvider",
     "PromptTemplate", "ProviderResult", "TranslationIssue", "TranslationRecord",
     "TranslationStatus", "TranslationStore", "TranslationStoreError", "TranslationTask",
-    "TranslationWorkflowError", "approve_translation", "build_tasks", "reject_translation",
+    "TranslationWorkflowError", "ExchangeError", "export_jsonl", "import_jsonl", "approve_translation", "build_tasks", "reject_translation",
     "run_batches", "write_approved",
 ]

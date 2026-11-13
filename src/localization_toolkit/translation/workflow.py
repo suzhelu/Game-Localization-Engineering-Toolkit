@@ -170,7 +170,7 @@ def run_batches(
                 old, status=TranslationStatus.STALE,
                 issues=old.issues + (TranslationIssue("stale_fingerprint", "Source, context, prompt, or rules changed; translation cannot be reused"),),
                 processed_at=_now(),
-            ))
+            ), expected_current=old)
             stale_count += 1
     pending: list[TranslationTask] = []
     for task in tasks:
@@ -191,11 +191,11 @@ def run_batches(
                 issues.append(TranslationIssue("cached_record_invalid", "Cached review record failed current association or structural checks"))
                 issues.extend(cached_issues)
                 store.upsert(replace(existing, status=TranslationStatus.NEEDS_REVIEW,
-                                     issues=tuple(issues), processed_at=_now()))
+                                     issues=tuple(issues), processed_at=_now()), expected_current=existing)
                 continue
             if not existing.issues:
                 continue
-            store.upsert(replace(existing, status=TranslationStatus.NEEDS_REVIEW, processed_at=_now()))
+            store.upsert(replace(existing, status=TranslationStatus.NEEDS_REVIEW, processed_at=_now()), expected_current=existing)
             continue
         pending.append(task)
 
@@ -208,6 +208,7 @@ def run_batches(
         }))[:24]
         prompts = {task.slot_id: prompt_template.render(task, glossary, special_rules) for task in batch}
         request = TranslationRequest(batch_id, tuple(batch), prompts)
+        batch_snapshot = store.snapshot_fingerprint()
         try:
             response = provider.translate(request)
             if isinstance(response, (str, bytes)) or not isinstance(response, Sequence):
@@ -216,19 +217,19 @@ def run_batches(
                 raise TypeError("Provider response contains a non-ProviderResult item")
         except Exception as exc:
             reason = str(exc)[:1000] or type(exc).__name__
-            store.save_many(_record(
+            store.save_many((_record(
                 task, batch_id, target_text=None, status=TranslationStatus.PROVIDER_ERROR,
                 issues=(TranslationIssue("provider_error", reason),), provider=getattr(provider, "name", type(provider).__name__),
-            ) for task in batch)
+            ) for task in batch), expected_fingerprint=batch_snapshot, allow_replace=True)
             continue
 
         malformed = [item for item in response if not isinstance(item.slot_id, str) or not isinstance(item.target_text, str)]
         if malformed:
-            store.save_many(_record(
+            store.save_many((_record(
                 task, batch_id, target_text=None, status=TranslationStatus.NEEDS_REVIEW,
                 issues=(TranslationIssue("invalid_provider_result", "Provider slot IDs and translations must be strings"),),
                 provider=getattr(provider, "name", type(provider).__name__),
-            ) for task in batch)
+            ) for task in batch), expected_fingerprint=batch_snapshot, allow_replace=True)
             continue
 
         by_id: dict[str, list[ProviderResult]] = {}
@@ -254,7 +255,7 @@ def run_batches(
                 task, batch_id, target_text=target_text, status=status, issues=issues,
                 provider=getattr(provider, "name", type(provider).__name__),
             ))
-        store.save_many(records)
+        store.save_many(records, expected_fingerprint=batch_snapshot, allow_replace=True)
 
     records = [store.get(task.task_id) for task in tasks]
     return {
@@ -296,7 +297,7 @@ def approve_translation(
         raise TranslationWorkflowError("Translation has blocking structural issues and cannot be approved")
     approved = replace(record, status=TranslationStatus.APPROVED, reviewer=reviewer.strip(),
                        review_note=review_note, processed_at=_now())
-    store.upsert(approved)
+    store.upsert(approved, expected_current=record)
     return approved
 
 
@@ -308,7 +309,7 @@ def reject_translation(task: TranslationTask, *, store: TranslationStore, review
         raise TranslationWorkflowError("No reviewable result exists for this task")
     rejected = replace(record, status=TranslationStatus.REJECTED, reviewer=reviewer.strip(),
                        review_note=reason.strip(), processed_at=_now())
-    store.upsert(rejected)
+    store.upsert(rejected, expected_current=record)
     return rejected
 
 

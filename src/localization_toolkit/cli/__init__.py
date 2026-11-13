@@ -11,7 +11,7 @@ from ..adapters.registry import default_registry
 from .config import Project
 from .workflow import (
     WorkflowError, compile_project, deploy_command, extract, initialize, inspect_project,
-    package, recover_command, review, status, translate, verify,
+    package, recover_command, review, status, translate, translate_export, translate_import, verify,
 )
 
 
@@ -42,6 +42,14 @@ def parser() -> argparse.ArgumentParser:
     _project_option(command)
     command = commands.add_parser("translate", help="Run configured local Mock Provider batches")
     _project_option(command)
+    command = commands.add_parser("translate-export", help="Export current unreviewed tasks as UTF-8 JSONL")
+    _project_option(command)
+    command.add_argument("output", help="New project-relative JSONL path (never overwritten)")
+    command.add_argument("--limit", type=int, default=0, help="Export at most this many tasks; 0 means all")
+    command.add_argument("--offset", type=int, default=0, help="Skip this many sorted pending tasks")
+    command = commands.add_parser("translate-import", help="Import Agent JSONL results into pending review")
+    _project_option(command)
+    command.add_argument("input", help="Project-relative UTF-8 JSONL result path")
     command = commands.add_parser("review", help="List results or explicitly approve/reject one slot")
     _project_option(command)
     command.add_argument("--approve-slot")
@@ -121,6 +129,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             _dump(extract(project))
         elif args.command == "translate":
             _dump(translate(project))
+        elif args.command == "translate-export":
+            _dump(translate_export(project, args.output, limit=args.limit, offset=args.offset))
+        elif args.command == "translate-import":
+            _dump(translate_import(project, args.input))
         elif args.command == "review":
             if args.approve_slot and args.reject_slot:
                 raise WorkflowError("Choose either --approve-slot or --reject-slot")
@@ -145,7 +157,10 @@ def main(argv: Sequence[str] | None = None) -> int:
             raise WorkflowError(f"Unsupported command: {args.command}")
         return 0
     except Exception as exc:
-        print(f"localize: error [LOCALIZE_ERROR]: {exc}\nNext: check the command help, project configuration, and reported adapter evidence.", file=sys.stderr)
+        code = getattr(exc, "code", "LOCALIZE_ERROR")
+        print(json.dumps({"schema_version": 1, "error": {"code": code, "message": str(exc),
+                           "next": "Check the task IDs, fingerprints, project paths, and current review state."}},
+                         ensure_ascii=False), file=sys.stderr)
         return 2
 
 

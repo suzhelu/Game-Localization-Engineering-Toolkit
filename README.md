@@ -28,6 +28,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 有固定快照、独立备份和事务日志的保守部署与恢复原语
 - 从调用方显式清单构建并审计确定性 ZIP 覆盖包（不负责安装）
 - 基于槽位 ID 的 AI 辅助翻译批次、术语约束、断点续跑与人工审核门槛
+- 面向外部 Agent 的离线 JSONL 任务交换、指纹校验、批次导入和待审核状态管理
 - 显式 CompilerAdapter、编译证据分级、有限的 MGSC v1 只读外壳检查与可审计构建
 - 使用既有适配器与构建 API 的项目 CLI、配置校验、状态追踪和显式审核工作流
 
@@ -55,6 +56,7 @@ Higurashi When They Cry Hou — Chapter 8: Matsuribayashi
 - 部署事务、崩溃恢复及限制：[`docs/deployment-transactions.md`](docs/deployment-transactions.md)
 - 确定性覆盖包格式、构建和审计：[`docs/overlay-packages.md`](docs/overlay-packages.md)
 - AI 翻译工作流、术语表和质量审核：[`docs/translation-workflow.md`](docs/translation-workflow.md)
+- Agent 离线翻译交换格式、CLI、锁与恢复限制：[`docs/agent-translation-exchange.md`](docs/agent-translation-exchange.md)
 - 编译适配器、MGSC v1 验证范围与构建证据：[`docs/compilation-adapters.md`](docs/compilation-adapters.md)
 - 统一命令行、项目配置及端到端工作流：[`docs/cli-workflow.md`](docs/cli-workflow.md)
 

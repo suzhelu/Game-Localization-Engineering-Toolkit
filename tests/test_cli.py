@@ -128,6 +128,37 @@ class CLITests(unittest.TestCase):
         self.assertEqual(second["provider_calls"], 0)
         self.assertEqual(second["approved"], 0)
 
+    def test_agent_jsonl_export_import_stays_pending_and_compile_blocked(self):
+        self.configure_script()
+        self.assertEqual(self.call("extract", *self.project_arg), 0)
+        self.assertEqual(self.call("translate-export", *self.project_arg, "exchange/tasks.jsonl"), 0, self.stderr.getvalue())
+        exported = json.loads((self.root / "exchange" / "tasks.jsonl").read_text(encoding="utf-8").splitlines()[0])
+        self.assertEqual(exported["schema_version"], 1)
+        result = {"schema_version": 1, "task_id": exported["task_id"], "slot_id": exported["slot_id"],
+                  "source_fingerprint": exported["source_fingerprint"], "task_fingerprint": exported["task_fingerprint"],
+                  "translated_text": "合成译文 {name}"}
+        (self.root / "exchange" / "results.jsonl").write_text(json.dumps(result, ensure_ascii=False) + "\n", encoding="utf-8")
+        self.assertEqual(self.call("translate-import", *self.project_arg, "exchange/results.jsonl"), 0, self.stderr.getvalue())
+        report = json.loads(self.stdout.getvalue())
+        self.assertEqual(report["pending_review"], 1)
+        self.assertEqual(self.call("compile", *self.project_arg), 2)
+
+    def test_agent_jsonl_cli_errors_are_structured_and_project_relative(self):
+        self.configure_script()
+        self.assertEqual(self.call("extract", *self.project_arg), 0)
+        self.assertEqual(self.call("translate-export", *self.project_arg, "../escape.jsonl"), 2)
+        error = json.loads(self.stderr.getvalue())
+        self.assertEqual(error["schema_version"], 1)
+        self.assertEqual(error["error"]["code"], "LOCALIZE_ERROR")
+        self.assertEqual(self.call("translate-import", *self.project_arg, "missing.jsonl"), 2)
+        self.assertEqual(json.loads(self.stderr.getvalue())["schema_version"], 1)
+
+    def test_agent_exchange_help_is_available(self):
+        for command in ("translate-export", "translate-import"):
+            with self.assertRaises(SystemExit) as raised:
+                self.call(command, "--help")
+            self.assertEqual(raised.exception.code, 0)
+
     def test_compile_blocks_unreviewed_text_then_compiles_after_explicit_approval(self):
         self.configure_script()
         self.extract_translate()
