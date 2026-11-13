@@ -1,5 +1,14 @@
 # Changelog
 
+## v0.2.0-rc2 — Preview candidate
+
+This release candidate preserves the v0.2.0rc1 feature scope and includes two focused corrections:
+
+- Make the synthetic workflow temporary-directory boundary test independent of the repository's checkout location, with regression coverage for both rejected outside paths and accepted nested workspaces.
+- Pin the PowerShell Quick Start and release-note clone examples to the selected release tag instead of the older default `main` branch.
+
+Full validation evidence and build asset digests are recorded in [the rc2 preparation report](docs/releases/v0.2.0rc2-preparation-report.md). This remains a preview: synthetic tests and static validation do not establish real-game runtime compatibility.
+
 ## v0.2.0-rc1 — Preview candidate
 
 This candidate consolidates the bounded AI-agent workflow delivered in batches A–E:

@@ -10,7 +10,7 @@ ROOT = Path(__file__).resolve().parents[1]
 DOCS = ['AGENTS.md', 'README.md', 'docs/quickstart-for-ai-users.md',
         'docs/ai-readiness-audit.md', 'docs/agent-entry-validation.md',
         'docs/compatibility.md', 'docs/faq.md', 'examples/agent-workflow/README.md',
-        'docs/release-readiness-v0.2.0.md', 'docs/releases/v0.2.0rc1.md', 'CHANGELOG.md',
+        'docs/release-readiness-v0.2.0.md', 'docs/releases/v0.2.0rc1.md', 'docs/releases/v0.2.0rc2.md', 'docs/releases/v0.2.0rc2-preparation-report.md', 'CHANGELOG.md',
         'skills/game-localization/SKILL.md',
         'skills/game-localization/references/analysis.md',
         'skills/game-localization/references/release.md']
@@ -70,8 +70,12 @@ class AgentDocsTests(unittest.TestCase):
             self.assertIn(phrase, text)
 
     def test_preview_install_examples_pin_the_release_tag(self):
-        clone = 'git clone --branch v0.2.0rc1 --depth 1 https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git'
-        for name in ('docs/quickstart-for-ai-users.md', 'docs/releases/v0.2.0rc1.md'):
+        release = (ROOT / 'docs/releases/v0.2.0rc2.md').read_text(encoding='utf-8')
+        match = re.search(r'^# Game Localization Engineering Toolkit (v[0-9.]+rc[0-9]+)$', release, re.MULTILINE)
+        self.assertIsNotNone(match)
+        tag = match.group(1)
+        clone = f'git clone --branch {tag} --depth 1 https://github.com/suzhelu/Game-Localization-Engineering-Toolkit.git'
+        for name in ('docs/quickstart-for-ai-users.md', 'docs/releases/v0.2.0rc2.md'):
             with self.subTest(document=name):
                 self.assertIn(clone, (ROOT / name).read_text(encoding='utf-8'))
 
